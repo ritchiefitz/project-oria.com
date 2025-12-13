@@ -1,4 +1,4 @@
-name              = "project-oria-com"
+name = "project-oria"
 main              = "worker.js"
 compatibility_date = "2025-07-26"
 
