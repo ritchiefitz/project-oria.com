@@ -1,0 +1,22 @@
+name              = "project-oria-com"
+main              = "worker.js"
+compatibility_date = "2025-07-26"
+
+# tell Wrangler to upload everything in ./public
+assets = { directory = "./public" }
+
+# optional: deploy straight to a custom domain / route
+# routes = [{ pattern = "example.com/*" }]
+# zone_id = "YOUR_ZONE_ID"
+
+# CUSTOM‑DOMAIN ROUTES
+routes = [
+  # Apex domain
+  { pattern = "project-oria.com/*",  zone_name = "project-oria.com" },
+
+  # WWW sub‑domain
+  { pattern = "www.project-oria.com/*", zone_name = "project-oria.com" }
+]
+
+# OPTIONAL: HIDE THE workers.dev PREVIEW
+workers_dev = false                          # omit if you still want the preview
