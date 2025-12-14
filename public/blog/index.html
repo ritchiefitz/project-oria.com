@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Read the latest insights on Artificial Intelligence, AGI, Quantum Computing, and future technologies on the Oria blog.">
+<meta name="keywords" content="AI Blog, Future Tech Articles, AGI News, Technology Insights, Oria Blog">
+<meta name="author" content="Oria">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://project-oria.com/blog/">
+<meta property="og:title" content="Blog - Oria | AI & Future Tech Insights">
+<meta property="og:description" content="Deep dives into artificial intelligence, emerging technologies, and the future we're building.">
+<meta property="og:image" content="https://project-oria.com/og-image.jpg">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://project-oria.com/blog/">
+<meta property="twitter:title" content="Blog - Oria | AI & Future Tech Insights">
+<meta property="twitter:description" content="Deep dives into artificial intelligence, emerging technologies, and the future we're building.">
+<meta property="twitter:image" content="https://project-oria.com/og-image.jpg">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Oria Blog",
+  "url": "https://project-oria.com/blog/",
+  "description": "Collection of articles about AI and future technologies.",
+  "publisher": {
+    "@type": "Person",
+    "name": "Oria"
+  }
+}
+</script>
+
+<title>Blog - Oria | AI & Future Tech Insights</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="logo">ORIA</div>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+      <a href="index.html">Blog</a>
+    </nav>
+  </header>
+
+  <section class="blog-header">
+    <h1>AI Insights & Articles</h1>
+    <p>Deep dives into artificial intelligence, emerging technologies, and the future we're building.</p>
+  </section>
+
+  <div class="blog-container">
+    <div id="blog-list" class="blog-grid">
+      <div class="loading">Loading posts...</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Oria. Powered by artificial intelligence.</p>
+  </footer>
+
+  <script>
+    async function loadAllPosts() {
+      const container = document.getElementById('blog-list');
+      
+      try {
+        const response = await fetch('posts.json');
+        const data = await response.json();
+        
+        if (data.posts.length === 0) {
+          container.innerHTML = '<div class="loading">No blog posts yet.</div>';
+          return;
+        }
+        
+        container.innerHTML = '';
+        
+        data.posts.forEach(post => {
+          const card = document.createElement('div');
+          card.classList.add('blog-card');
+          card.onclick = () => window.location.href = `${post.slug}.html`;
+          
+          card.innerHTML = `
+            <div class="blog-card-content">
+              <div class="blog-date">${post.date}</div>
+              <h3>${post.title}</h3>
+              <p>${post.excerpt}</p>
+              <a href="${post.slug}.html" class="read-more">Read more</a>
+            </div>
+          `;
+          
+          container.appendChild(card);
+        });
+      } catch (error) {
+        container.innerHTML = '<div class="loading">Error loading posts.</div>';
+      }
+    }
+
+    loadAllPosts();
+  </script>
+</body>
+</html>

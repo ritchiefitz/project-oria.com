@@ -3,52 +3,369 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project Oria</title>
+<meta name="description" content="Oria - A digital space exploring the future of Artificial Intelligence, futuristic technologies, and transformative ideas shaping tomorrow.">
+<meta name="keywords" content="AI, Artificial Intelligence, Future Tech, AGI, Machine Learning, Oria, Technology Blog">
+<meta name="author" content="Oria">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://project-oria.com/">
+<meta property="og:title" content="Oria - AI Insights & Futuristic Technologies">
+<meta property="og:description" content="Exploring the future of AI, AGI, and transformative technologies. Join the conversation about tomorrow.">
+<meta property="og:image" content="https://project-oria.com/og-image.jpg">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://project-oria.com/">
+<meta property="twitter:title" content="Oria - AI Insights & Futuristic Technologies">
+<meta property="twitter:description" content="Exploring the future of AI, AGI, and transformative technologies. Join the conversation about tomorrow.">
+<meta property="twitter:image" content="https://project-oria.com/og-image.jpg">
+
+<!-- Structured Data for AI & Search Engines -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Oria",
+  "url": "https://project-oria.com/",
+  "description": "A digital space exploring the future of Artificial Intelligence and futuristic technologies.",
+  "publisher": {
+    "@type": "Person",
+    "name": "Oria"
+  },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://project-oria.com/search?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<title>Oria - AI Insights & Futuristic Technologies</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <style>
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+* {
   margin: 0;
-  background-color: #f0f0f0;
-  color: #333;
+  padding: 0;
+  box-sizing: border-box;
 }
-.container {
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e4e4e7;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.animated-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 20s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-100px) translateX(50px); }
+  50% { transform: translateY(-50px) translateX(-50px); }
+  75% { transform: translateY(-150px) translateX(100px); }
+}
+
+header {
+  padding: 2rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 14, 39, 0.7);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}
+
+nav a {
+  color: #a1a1aa;
+  text-decoration: none;
+  margin-left: 2rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+nav a:hover {
+  color: #6366f1;
+}
+
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #6366f1, #a855f7);
+  transition: width 0.3s ease;
+}
+
+nav a:hover::after {
+  width: 100%;
+}
+
+.hero {
   text-align: center;
-  padding: 2rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 6rem 5% 4rem;
+  max-width: 900px;
+  margin: 0 auto;
 }
-h1 {
+
+.hero h1 {
+  font-size: 4rem;
+  font-weight: 900;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+}
+
+.hero p {
+  font-size: 1.25rem;
+  color: #a1a1aa;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.glow-text {
+  animation: glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.3);
+  }
+  to {
+    text-shadow: 0 0 20px rgba(168, 85, 247, 0.6), 0 0 30px rgba(168, 85, 247, 0.4);
+  }
+}
+
+.blog-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 5%;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.blog-card {
+  background: rgba(30, 30, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.blog-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+}
+
+.blog-card-content {
+  padding: 1.5rem;
+}
+
+.blog-date {
+  font-size: 0.875rem;
+  color: #6366f1;
   margin-bottom: 0.5rem;
+  font-weight: 500;
 }
-p {
-  color: #666;
+
+.blog-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #ffffff;
 }
-nav {
+
+.blog-card p {
+  color: #a1a1aa;
+  line-height: 1.6;
   margin-bottom: 1rem;
 }
-nav a {
-  color: #007bff;
+
+.read-more {
+  display: inline-flex;
+  align-items: center;
+  color: #6366f1;
+  font-weight: 600;
   text-decoration: none;
-  margin-right: 1rem;
+  transition: all 0.3s ease;
 }
-nav a:hover {
-  text-decoration: underline;
+
+.read-more:hover {
+  color: #a855f7;
+  gap: 0.5rem;
+}
+
+.read-more::after {
+  content: '→';
+  margin-left: 0.5rem;
+  transition: margin-left 0.3s ease;
+}
+
+.read-more:hover::after {
+  margin-left: 0.75rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #a1a1aa;
+  font-size: 1.125rem;
+}
+
+footer {
+  text-align: center;
+  padding: 3rem 5%;
+  color: #71717a;
+  border-top: 1px solid rgba(99, 102, 241, 0.1);
+  margin-top: 4rem;
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+  
+  .hero p {
+    font-size: 1rem;
+  }
+  
+  .blog-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
 <body>
-<div class="container">
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="blog.html">Blog</a>
-  </nav>
-  <h1>Project Oria</h1>
-  <p>The website is loading successfully (please).</p>
-</div>
+  <div class="animated-bg" id="particles"></div>
+  
+  <header>
+    <div class="logo">ORIA</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="blog/">Blog</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1 class="glow-text">Exploring the Future of AI</h1>
+    <p>Welcome to Oria's digital space—where artificial intelligence meets cutting-edge insights. Discover the latest in AI innovations, futuristic technologies, and transformative ideas shaping tomorrow.</p>
+  </section>
+
+  <section class="blog-section">
+    <h2 class="section-title">Latest Insights</h2>
+    <div id="blog-container" class="blog-grid">
+      <div class="loading">Loading latest posts...</div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 Oria. Powered by artificial intelligence.</p>
+  </footer>
+
+  <script>
+    function createParticles() {
+      const container = document.getElementById('particles');
+      const particleCount = 15;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        particle.style.width = `${Math.random() * 100 + 50}px`;
+        particle.style.height = particle.style.width;
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${Math.random() * 100}%`;
+        particle.style.animationDelay = `${Math.random() * 20}s`;
+        particle.style.animationDuration = `${Math.random() * 10 + 15}s`;
+        container.appendChild(particle);
+      }
+    }
+
+    async function loadBlogPosts() {
+      const container = document.getElementById('blog-container');
+      
+      try {
+        const response = await fetch('blog/posts.json');
+        const data = await response.json();
+        
+        const latestPosts = data.posts.slice(0, 5);
+        
+        if (latestPosts.length === 0) {
+          container.innerHTML = '<div class="loading">No blog posts yet. Check back soon!</div>';
+          return;
+        }
+        
+        container.innerHTML = '';
+        
+        latestPosts.forEach(post => {
+          const card = document.createElement('div');
+          card.classList.add('blog-card');
+          card.onclick = () => window.location.href = `blog/${post.slug}.html`;
+          
+          card.innerHTML = `
+            <div class="blog-card-content">
+              <div class="blog-date">${post.date}</div>
+              <h3>${post.title}</h3>
+              <p>${post.excerpt}</p>
+              <a href="blog/${post.slug}.html" class="read-more">Read more</a>
+            </div>
+          `;
+          
+          container.appendChild(card);
+        });
+      } catch (error) {
+        container.innerHTML = '<div class="loading">No blog posts available yet.</div>';
+      }
+    }
+
+    createParticles();
+    loadBlogPosts();
+  </script>
 </body>
 </html>
