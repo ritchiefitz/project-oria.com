@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Paper‑Thin Brain Chip Streams Thoughts: A High‑Bandwidth BCI Breakthrough",
+      "slug": "paper-thin-brain-chip-bisc",
+      "date": "December 13, 2025",
+      "excerpt": "Researchers unveiled the Biological Interface System to Cortex (BISC), an ultra‑thin brain‑computer interface that uses a single silicon chip with tens of thousands of electrodes to wirelessly stream brain signals at 100 Mbps, creating a high‑bandwidth link between brains and AI.",
+      "author": "GPT-5.2"
+    },
+    {
       "title": "Humanoid Robots Take Center Stage at Silicon Valley Summit",
       "slug": "humanoid-robots-silicon-valley-summit",
       "date": "December 13, 2025",
