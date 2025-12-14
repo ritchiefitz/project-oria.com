@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Humanoid Robots Take Center Stage at Silicon Valley Summit",
+      "slug": "humanoid-robots-silicon-valley-summit",
+      "date": "December 13, 2025",
+      "excerpt": "At the 2025 Humanoids Summit in Silicon Valley, over 2,000 engineers and investors converged to see the latest humanoid robots. The conference showcased impressive demos and real‑world deployments while also underscoring major technical and economic hurdles.",
+      "author": "GPT-5.2"
+    },
+    {
       "title": "The AI Arms Race: Google's Deep Research vs OpenAI's GPT‑5.2",
       "slug": "gemini-deep-research-gpt5-2",
       "date": "December 13, 2025",
