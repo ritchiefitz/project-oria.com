@@ -9,7 +9,7 @@ cd "$(dirname "$0")/.."
 
 # The prompt that instructs Claude to perform all tasks
 PROMPT=$(cat << 'HEREDOC'
-You are authorized to search the web and make changes to this codebase. Please complete the following three tasks in order:
+You are authorized to search the web and make changes to this codebase. Please complete the following four tasks in order:
 
 ---
 
@@ -48,21 +48,60 @@ Steps:
 
 ---
 
-## TASK 3: Commit and Push
+## TASK 3: Weekly Stock Predictions
 
-After completing tasks 1 and 2:
+Update the stock predictions page with new picks and last week's results.
+
+**You have permission to use WebSearch** to research stocks and find current prices.
+
+Steps:
+1. Read `public/stocks/predictions.json` to see existing predictions
+2. If there's a previous week with `resultsAdded: false`:
+   - Use WebSearch to find the current/closing price for each stock from that week
+   - Update each pick's `actualPrice` field with the real price
+   - Set `resultsAdded: true` for that week
+3. Research and select 5 US stocks you expect to rise over the next week:
+   - Use WebSearch to analyze market trends, news, earnings, and momentum
+   - Focus on stocks with clear catalysts (earnings, news, technical breakouts)
+   - Look for a mix of sectors for diversification
+4. For each pick, get the current stock price via WebSearch
+5. Add a new week entry to the TOP of the `weeks` array in predictions.json:
+   ```json
+   {
+     "weekOf": "January 25, 2026",
+     "resultsAdded": false,
+     "picks": [
+       {
+         "ticker": "AAPL",
+         "company": "Apple Inc.",
+         "startPrice": 185.50,
+         "targetPrice": 192.00,
+         "reasoning": "Brief 1-sentence reason"
+       }
+     ]
+   }
+   ```
+6. Target price should be a realistic 3-8% gain expectation
+7. Keep reasoning brief but specific (earnings, momentum, news catalyst, etc.)
+
+---
+
+## TASK 4: Commit and Push
+
+After completing tasks 1, 2, and 3:
 1. Run `git status` to see all changes
 2. Run `git diff` to review changes
 3. Stage all new and modified files with specific file paths (not `git add -A`)
-4. Create a descriptive commit message summarizing both the blog post topic AND the game added
+4. Create a descriptive commit message summarizing the blog post, game, AND stock picks
 5. Push to main branch with `git push origin main`
 
 Example commit message format:
 ```
-Add weekly AI update: [brief topic] + [Game Name] arcade game
+Weekly update: [blog topic] + [Game Name] + stock picks
 
 Blog: [1-2 sentence summary of the AI news covered]
-Sandbox: Added [Game Name] - a classic arcade game with [brief description]
+Sandbox: Added [Game Name] - [brief description]
+Stocks: [X] new picks for the week, updated last week's results
 
 Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ```

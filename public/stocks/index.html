@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Oria AI Stock Predictions - Weekly US stock picks with price targets and historical accuracy tracking.">
+<meta name="author" content="Oria">
+
+<title>Stock Predictions - Oria</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e4e4e7;
+  min-height: 100vh;
+}
+
+header {
+  padding: 2rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 14, 39, 0.7);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+nav a {
+  color: #a1a1aa;
+  text-decoration: none;
+  margin-left: 2rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+nav a:hover {
+  color: #6366f1;
+}
+
+.hero {
+  text-align: center;
+  padding: 4rem 5% 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: 1.125rem;
+  color: #a1a1aa;
+  line-height: 1.7;
+}
+
+.disclaimer {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin: 2rem auto;
+  max-width: 800px;
+  font-size: 0.875rem;
+  color: #fca5a5;
+}
+
+.section {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 5%;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.section-title .badge {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.week-card {
+  background: rgba(30, 30, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.week-header {
+  background: rgba(99, 102, 241, 0.1);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.week-date {
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.week-stats {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-label {
+  color: #a1a1aa;
+}
+
+.stat-value {
+  font-weight: 700;
+}
+
+.stat-value.positive {
+  color: #22c55e;
+}
+
+.stat-value.negative {
+  color: #ef4444;
+}
+
+.stat-value.neutral {
+  color: #6366f1;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+th {
+  color: #a1a1aa;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+td {
+  font-variant-numeric: tabular-nums;
+}
+
+.ticker {
+  font-weight: 700;
+  color: #6366f1;
+}
+
+.company {
+  color: #a1a1aa;
+  font-size: 0.875rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+.target {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.actual {
+  font-weight: 600;
+}
+
+.actual.hit {
+  color: #22c55e;
+}
+
+.actual.miss {
+  color: #ef4444;
+}
+
+.change {
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.change.positive {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.change.negative {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.reasoning {
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  max-width: 200px;
+}
+
+.pending {
+  color: #a1a1aa;
+  font-style: italic;
+}
+
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  color: #a1a1aa;
+}
+
+.accuracy-summary {
+  background: rgba(30, 30, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.accuracy-item h3 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.accuracy-item p {
+  color: #a1a1aa;
+  font-size: 0.875rem;
+}
+
+footer {
+  text-align: center;
+  padding: 3rem 5%;
+  color: #71717a;
+  border-top: 1px solid rgba(99, 102, 241, 0.1);
+  margin-top: 4rem;
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  th, td {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .reasoning {
+    display: none;
+  }
+
+  .week-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+</style>
+</head>
+<body>
+  <header>
+    <a href="../index.html" class="logo">ORIA</a>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+      <a href="../blog/">Blog</a>
+      <a href="../sandbox/">Sandbox</a>
+      <a href="index.html">Stocks</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>AI Stock Predictions</h1>
+    <p>Weekly US stock picks powered by AI analysis. Each week, Claude selects 5 stocks expected to rise, with price targets and reasoning. Results are tracked for transparency.</p>
+  </section>
+
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> This is an AI experiment for entertainment purposes only. This is NOT financial advice. Do not make investment decisions based on these predictions. Past performance does not guarantee future results. Always consult a qualified financial advisor.
+  </div>
+
+  <section class="section">
+    <div id="accuracy-summary" class="accuracy-summary" style="display: none;">
+      <div class="accuracy-item">
+        <h3 id="total-picks">0</h3>
+        <p>Total Picks</p>
+      </div>
+      <div class="accuracy-item">
+        <h3 id="correct-picks" class="positive">0</h3>
+        <p>Correct (Hit Target)</p>
+      </div>
+      <div class="accuracy-item">
+        <h3 id="accuracy-rate" class="neutral">0%</h3>
+        <p>Accuracy Rate</p>
+      </div>
+      <div class="accuracy-item">
+        <h3 id="avg-return" class="neutral">0%</h3>
+        <p>Avg Return</p>
+      </div>
+    </div>
+
+    <div id="predictions-container">
+      <div class="no-data">
+        <p>No predictions yet. Check back after the first weekly update!</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Oria. Powered by artificial intelligence.</p>
+  </footer>
+
+  <script>
+    async function loadPredictions() {
+      try {
+        const response = await fetch('predictions.json');
+        const data = await response.json();
+
+        if (!data.weeks || data.weeks.length === 0) {
+          return;
+        }
+
+        const container = document.getElementById('predictions-container');
+        container.innerHTML = '';
+
+        let totalPicks = 0;
+        let correctPicks = 0;
+        let totalReturn = 0;
+        let completedPicks = 0;
+
+        // Sort weeks by date descending (newest first)
+        const sortedWeeks = [...data.weeks].sort((a, b) =>
+          new Date(b.weekOf) - new Date(a.weekOf)
+        );
+
+        sortedWeeks.forEach((week, index) => {
+          const isCurrentWeek = index === 0 && !week.resultsAdded;
+
+          const weekCard = document.createElement('div');
+          weekCard.className = 'week-card';
+
+          let weekStats = '';
+          if (week.resultsAdded) {
+            const weekCorrect = week.picks.filter(p =>
+              p.actualPrice && p.actualPrice >= p.targetPrice
+            ).length;
+            const weekReturn = week.picks.reduce((sum, p) => {
+              if (p.actualPrice && p.startPrice) {
+                return sum + ((p.actualPrice - p.startPrice) / p.startPrice * 100);
+              }
+              return sum;
+            }, 0) / week.picks.length;
+
+            weekStats = `
+              <div class="week-stats">
+                <div class="stat">
+                  <span class="stat-label">Hit Rate:</span>
+                  <span class="stat-value ${weekCorrect >= 3 ? 'positive' : 'negative'}">${weekCorrect}/5</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Avg Return:</span>
+                  <span class="stat-value ${weekReturn >= 0 ? 'positive' : 'negative'}">${weekReturn >= 0 ? '+' : ''}${weekReturn.toFixed(2)}%</span>
+                </div>
+              </div>
+            `;
+
+            // Accumulate stats
+            week.picks.forEach(p => {
+              if (p.actualPrice) {
+                totalPicks++;
+                completedPicks++;
+                if (p.actualPrice >= p.targetPrice) correctPicks++;
+                totalReturn += ((p.actualPrice - p.startPrice) / p.startPrice * 100);
+              }
+            });
+          }
+
+          weekCard.innerHTML = `
+            <div class="week-header">
+              <div class="week-date">
+                Week of ${week.weekOf}
+                ${isCurrentWeek ? '<span class="badge">Current</span>' : ''}
+              </div>
+              ${weekStats}
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Stock</th>
+                  <th>Start Price</th>
+                  <th>Target</th>
+                  <th>Actual</th>
+                  <th>Change</th>
+                  <th>Reasoning</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${week.picks.map(pick => {
+                  const change = pick.actualPrice
+                    ? ((pick.actualPrice - pick.startPrice) / pick.startPrice * 100)
+                    : null;
+                  const hitTarget = pick.actualPrice && pick.actualPrice >= pick.targetPrice;
+
+                  return `
+                    <tr>
+                      <td>
+                        <div class="ticker">${pick.ticker}</div>
+                        <div class="company">${pick.company}</div>
+                      </td>
+                      <td class="price">$${pick.startPrice.toFixed(2)}</td>
+                      <td class="target">$${pick.targetPrice.toFixed(2)}</td>
+                      <td class="actual ${pick.actualPrice ? (hitTarget ? 'hit' : 'miss') : ''}">
+                        ${pick.actualPrice ? '$' + pick.actualPrice.toFixed(2) : '<span class="pending">Pending...</span>'}
+                      </td>
+                      <td>
+                        ${change !== null
+                          ? `<span class="change ${change >= 0 ? 'positive' : 'negative'}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</span>`
+                          : '-'
+                        }
+                      </td>
+                      <td class="reasoning">${pick.reasoning || ''}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          `;
+
+          container.appendChild(weekCard);
+        });
+
+        // Update accuracy summary if we have completed picks
+        if (completedPicks > 0) {
+          document.getElementById('accuracy-summary').style.display = 'grid';
+          document.getElementById('total-picks').textContent = totalPicks;
+          document.getElementById('correct-picks').textContent = correctPicks;
+          document.getElementById('accuracy-rate').textContent =
+            ((correctPicks / totalPicks) * 100).toFixed(1) + '%';
+          document.getElementById('avg-return').textContent =
+            (totalReturn / completedPicks >= 0 ? '+' : '') +
+            (totalReturn / completedPicks).toFixed(2) + '%';
+        }
+
+      } catch (error) {
+        console.error('Error loading predictions:', error);
+      }
+    }
+
+    loadPredictions();
+  </script>
+</body>
+</html>
