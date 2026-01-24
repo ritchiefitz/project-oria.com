@@ -27,23 +27,11 @@ Steps:
 
 ---
 
-## TASK 2: Add a Retro Arcade Game to the Sandbox
+## TASK 2: Create an Original 2D Game for the Sandbox
 
-Create or update the Oria Sandbox with a fun, playable retro-style arcade game.
+Invent and build an original 2D video game for the Oria Sandbox. Be creative - design something fun and unique that you're confident you can implement in a single shot.
 
-**IMPORTANT: You must create a DIFFERENT game each time. Check what games already exist in the sandbox and create something new.**
-
-Game ideas (pick one that doesn't already exist):
-- Snake
-- Breakout/Brick Breaker
-- Asteroids
-- Space Invaders
-- Pong
-- Tetris
-- Pac-Man style maze game
-- Flappy Bird clone
-- Frogger
-- Galaga-style shooter
+**IMPORTANT: Never create the same type of game twice. Check what games already exist in the sandbox and invent something completely different.**
 
 Steps:
 1. Check if `public/sandbox/` directory exists and what games are already there
