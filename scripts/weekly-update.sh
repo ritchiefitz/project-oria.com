@@ -89,7 +89,7 @@ HEREDOC
 echo "Starting weekly Oria update..."
 echo "================================"
 claude -p "$PROMPT" \
-  --model claude-opus-4-5-20250101 \
+  --model opus \
   --dangerously-skip-permissions \
   --allowedTools "WebSearch,WebFetch,Read,Write,Edit,Glob,Grep,Bash(git*)"
 
