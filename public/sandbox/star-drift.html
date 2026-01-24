@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Gravity Flip - A gravity-defying arcade game. Flip gravity to avoid obstacles and survive as long as you can!">
-<title>Gravity Flip - Oria Sandbox</title>
+<meta name="description" content="Star Drift - An Asteroids-style arcade game. Pilot your ship through obstacles and survive as long as you can!">
+<title>Star Drift - Oria Sandbox</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <style>
 * {
@@ -202,7 +202,7 @@ footer {
 
   <div class="game-container">
     <div class="game-header">
-      <h1 class="game-title">Gravity Flip</h1>
+      <h1 class="game-title">Star Drift</h1>
       <div class="score-display">
         <div class="score-item">
           <span class="score-label">Score:</span>
@@ -217,16 +217,15 @@ footer {
 
     <canvas id="gameCanvas" width="800" height="500"></canvas>
 
-    <button class="mobile-btn" id="flipBtn">FLIP GRAVITY</button>
+    <button class="mobile-btn" id="flipBtn">START GAME</button>
 
     <div class="controls-info">
       <h3>How to Play</h3>
-      <p>Flip gravity to navigate through obstacles. The longer you survive, the higher your score!</p>
+      <p>Pilot your ship through the obstacles. Rotate and thrust to navigate!</p>
       <div class="control-keys">
-        <span class="key">SPACE</span>
-        <span class="key">W</span>
-        <span class="key">UP ARROW</span>
-        <span class="key">CLICK</span>
+        <span class="key">← → Rotate</span>
+        <span class="key">↑ Thrust</span>
+        <span class="key">WASD</span>
       </div>
     </div>
   </div>
@@ -246,19 +245,29 @@ footer {
     let gameRunning = false;
     let gameOver = false;
     let score = 0;
-    let highScore = parseInt(localStorage.getItem('gravityFlipHighScore')) || 0;
+    let highScore = parseInt(localStorage.getItem('starDriftHighScore')) || 0;
     highScoreElement.textContent = highScore;
 
-    // Player
+    // Player - Asteroids style
     const player = {
       x: 120,
       y: canvas.height / 2,
       width: 30,
       height: 30,
+      velocityX: 0,
       velocityY: 0,
-      gravity: 0.35,
-      gravityDirection: 1,
-      flipCooldown: 0
+      angle: 0,  // radians, 0 = pointing right
+      rotationSpeed: 0.08,
+      thrust: 0.15,
+      friction: 0.99,
+      maxSpeed: 6
+    };
+
+    // Input state
+    const keys = {
+      left: false,
+      right: false,
+      up: false
     };
 
     // Obstacles
@@ -283,10 +292,11 @@ footer {
     };
 
     function resetGame() {
+      player.x = 120;
       player.y = canvas.height / 2;
+      player.velocityX = 0;
       player.velocityY = 0;
-      player.gravityDirection = 1;
-      player.flipCooldown = 0;
+      player.angle = 0;
       obstacles = [];
       particles = [];
       obstacleTimer = 0;
@@ -297,27 +307,7 @@ footer {
       gameRunning = true;
     }
 
-    function flipGravity() {
-      if (player.flipCooldown <= 0) {
-        player.gravityDirection *= -1;
-        player.velocityY = player.gravityDirection * 3;
-        player.flipCooldown = 5;
-
-        // Add flip particles
-        for (let i = 0; i < 10; i++) {
-          particles.push({
-            x: player.x + player.width / 2,
-            y: player.y + player.height / 2,
-            vx: (Math.random() - 0.5) * 8,
-            vy: (Math.random() - 0.5) * 8,
-            life: 30,
-            maxLife: 30,
-            size: Math.random() * 6 + 2
-          });
-        }
-      }
-    }
-
+    
     function createObstacle() {
       const gapSize = 150 + Math.random() * 50;
       const gapPosition = 80 + Math.random() * (canvas.height - gapSize - 160);
@@ -332,17 +322,51 @@ footer {
     }
 
     function updatePlayer() {
-      // Apply gravity
-      player.velocityY += player.gravity * player.gravityDirection;
-      player.velocityY = Math.max(-15, Math.min(15, player.velocityY));
-      player.y += player.velocityY;
+      // Rotation
+      if (keys.left) player.angle -= player.rotationSpeed;
+      if (keys.right) player.angle += player.rotationSpeed;
 
-      // Cooldown
-      if (player.flipCooldown > 0) player.flipCooldown--;
+      // Thrust
+      if (keys.up) {
+        player.velocityX += Math.cos(player.angle) * player.thrust;
+        player.velocityY += Math.sin(player.angle) * player.thrust;
+
+        // Thrust particles
+        if (Math.random() > 0.3) {
+          const backX = player.x + player.width / 2 - Math.cos(player.angle) * 20;
+          const backY = player.y + player.height / 2 - Math.sin(player.angle) * 20;
+          particles.push({
+            x: backX + (Math.random() - 0.5) * 8,
+            y: backY + (Math.random() - 0.5) * 8,
+            vx: -Math.cos(player.angle) * 4 + (Math.random() - 0.5) * 2,
+            vy: -Math.sin(player.angle) * 4 + (Math.random() - 0.5) * 2,
+            life: 25,
+            maxLife: 25,
+            size: Math.random() * 5 + 2
+          });
+        }
+      }
+
+      // Apply friction
+      player.velocityX *= player.friction;
+      player.velocityY *= player.friction;
+
+      // Limit speed
+      const speed = Math.sqrt(player.velocityX ** 2 + player.velocityY ** 2);
+      if (speed > player.maxSpeed) {
+        player.velocityX = (player.velocityX / speed) * player.maxSpeed;
+        player.velocityY = (player.velocityY / speed) * player.maxSpeed;
+      }
+
+      // Move player
+      player.x += player.velocityX;
+      player.y += player.velocityY;
 
       // Boundary collision
       const topBound = 40;
       const bottomBound = canvas.height - 40;
+      const leftBound = 20;
+      const rightBound = canvas.width - 20;
 
       if (player.y < topBound) {
         player.y = topBound;
@@ -352,18 +376,13 @@ footer {
         player.y = bottomBound - player.height;
         player.velocityY = 0;
       }
-
-      // Trail particles
-      if (gameRunning && Math.random() > 0.5) {
-        particles.push({
-          x: player.x,
-          y: player.y + player.height / 2 + (Math.random() - 0.5) * 10,
-          vx: -2,
-          vy: (Math.random() - 0.5) * 2,
-          life: 20,
-          maxLife: 20,
-          size: Math.random() * 4 + 2
-        });
+      if (player.x < leftBound) {
+        player.x = leftBound;
+        player.velocityX = 0;
+      }
+      if (player.x + player.width > rightBound) {
+        player.x = rightBound - player.width;
+        player.velocityX = 0;
       }
     }
 
@@ -463,26 +482,38 @@ footer {
       ctx.shadowColor = colors.playerGlow;
       ctx.shadowBlur = 20;
 
-      // Player body
-      ctx.fillStyle = colors.player;
-      ctx.beginPath();
-
-      // Draw a directional arrow shape
       const cx = player.x + player.width / 2;
       const cy = player.y + player.height / 2;
       const size = player.width / 2;
 
       ctx.save();
       ctx.translate(cx, cy);
-      ctx.rotate(player.gravityDirection > 0 ? Math.PI / 2 : -Math.PI / 2);
+      ctx.rotate(player.angle);
+
+      // Draw Asteroids-style ship (triangle with notch)
+      ctx.strokeStyle = colors.player;
+      ctx.fillStyle = 'rgba(99, 102, 241, 0.3)';
+      ctx.lineWidth = 2;
 
       ctx.beginPath();
-      ctx.moveTo(size, 0);
-      ctx.lineTo(-size, -size * 0.7);
-      ctx.lineTo(-size * 0.3, 0);
-      ctx.lineTo(-size, size * 0.7);
+      ctx.moveTo(size + 5, 0);  // nose
+      ctx.lineTo(-size, -size * 0.8);  // top back
+      ctx.lineTo(-size * 0.5, 0);  // notch
+      ctx.lineTo(-size, size * 0.8);  // bottom back
       ctx.closePath();
       ctx.fill();
+      ctx.stroke();
+
+      // Draw thruster flame when thrusting
+      if (keys.up) {
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.moveTo(-size * 0.5, -size * 0.3);
+        ctx.lineTo(-size - 10 - Math.random() * 10, 0);
+        ctx.lineTo(-size * 0.5, size * 0.3);
+        ctx.closePath();
+        ctx.fill();
+      }
 
       ctx.restore();
       ctx.shadowBlur = 0;
@@ -529,14 +560,14 @@ footer {
         ctx.fillStyle = colors.text;
         ctx.font = 'bold 48px Inter, system-ui, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('GRAVITY FLIP', canvas.width / 2, canvas.height / 2 - 40);
+        ctx.fillText('STAR DRIFT', canvas.width / 2, canvas.height / 2 - 40);
 
         ctx.font = '24px Inter, system-ui, sans-serif';
         ctx.fillStyle = '#a1a1aa';
-        ctx.fillText('Press SPACE or tap to start', canvas.width / 2, canvas.height / 2 + 20);
+        ctx.fillText('Press UP or W to start', canvas.width / 2, canvas.height / 2 + 20);
 
         ctx.font = '18px Inter, system-ui, sans-serif';
-        ctx.fillText('Flip gravity to navigate through obstacles', canvas.width / 2, canvas.height / 2 + 60);
+        ctx.fillText('← → to rotate, ↑ to thrust', canvas.width / 2, canvas.height / 2 + 60);
       }
 
       if (gameOver) {
@@ -583,7 +614,7 @@ footer {
           if (score > highScore) {
             highScore = score;
             highScoreElement.textContent = highScore;
-            localStorage.setItem('gravityFlipHighScore', highScore);
+            localStorage.setItem('starDriftHighScore', highScore);
           }
 
           // Explosion particles
@@ -605,36 +636,53 @@ footer {
       requestAnimationFrame(gameLoop);
     }
 
-    function handleInput() {
+    function startGame() {
       if (!gameRunning && !gameOver) {
         resetGame();
       } else if (gameOver) {
         resetGame();
-      } else if (gameRunning) {
-        flipGravity();
       }
     }
 
     // Keyboard controls
     document.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' || e.code === 'KeyW' || e.code === 'ArrowUp') {
+      if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault();
-        handleInput();
+        startGame();
+      }
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+        e.preventDefault();
+        keys.left = true;
+      }
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+        e.preventDefault();
+        keys.right = true;
+      }
+      if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+        e.preventDefault();
+        keys.up = true;
+        startGame();
       }
     });
 
-    // Mouse/touch controls
-    canvas.addEventListener('click', handleInput);
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+      if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = false;
+    });
+
+    // Mouse/touch controls for starting
+    canvas.addEventListener('click', startGame);
     canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
-      handleInput();
+      startGame();
     });
 
     // Mobile button
-    flipBtn.addEventListener('click', handleInput);
+    flipBtn.addEventListener('click', startGame);
     flipBtn.addEventListener('touchstart', (e) => {
       e.preventDefault();
-      handleInput();
+      startGame();
     });
 
     // Start game loop
