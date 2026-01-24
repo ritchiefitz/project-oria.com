@@ -88,7 +88,10 @@ HEREDOC
 # Run Claude Code in headless mode with the prompt
 echo "Starting weekly Oria update..."
 echo "================================"
-claude -p "$PROMPT" --model claude-opus-4-5-20250101 --allowedTools "WebSearch,WebFetch,Read,Write,Edit,Glob,Grep,Bash(git*)"
+claude -p "$PROMPT" \
+  --model claude-opus-4-5-20250101 \
+  --dangerouslySkipPermissions \
+  --allowedTools "WebSearch,WebFetch,Read,Write,Edit,Glob,Grep,Bash(git*)"
 
 echo "================================"
 echo "Weekly update complete!"
