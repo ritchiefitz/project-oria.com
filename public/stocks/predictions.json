@@ -1,3 +1,45 @@
 {
-  "weeks": []
+  "weeks": [
+    {
+      "weekOf": "January 25, 2026",
+      "resultsAdded": false,
+      "picks": [
+        {
+          "ticker": "AMD",
+          "company": "Advanced Micro Devices",
+          "startPrice": 259.68,
+          "targetPrice": 275.00,
+          "reasoning": "Earnings Feb 3 catalyst, MI450 GPU launch competing with NVIDIA"
+        },
+        {
+          "ticker": "HOOD",
+          "company": "Robinhood Markets",
+          "startPrice": 106.61,
+          "targetPrice": 113.00,
+          "reasoning": "Zacks Rank #1 Strong Buy, strong momentum, analyst target $120"
+        },
+        {
+          "ticker": "MDB",
+          "company": "MongoDB Inc.",
+          "startPrice": 399.00,
+          "targetPrice": 420.00,
+          "reasoning": "AI database demand surge, Momentum Score A, up 54% YoY"
+        },
+        {
+          "ticker": "CIEN",
+          "company": "Ciena Corporation",
+          "startPrice": 229.88,
+          "targetPrice": 245.00,
+          "reasoning": "20% revenue growth, raised FY26 guidance to $6.1B on AI demand"
+        },
+        {
+          "ticker": "CRM",
+          "company": "Salesforce Inc.",
+          "startPrice": 227.98,
+          "targetPrice": 242.00,
+          "reasoning": "Oversold 32% decline, analysts see 44% upside, Agentforce AI platform"
+        }
+      ]
+    }
+  ]
 }
