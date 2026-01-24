@@ -2,8 +2,8 @@ name: Weekly Oria Update
 
 on:
   schedule:
-    # Runs weekly on Sunday at 7am Central Time (13:00 UTC)
-    - cron: '0 13 * * 0'
+    # Runs weekly on Friday at 7am Central Time (13:00 UTC)
+    - cron: '0 13 * * 5'
   workflow_dispatch:  # Allows manual trigger from GitHub UI
 
 permissions:
