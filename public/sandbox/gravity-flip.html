@@ -256,7 +256,7 @@ footer {
       width: 30,
       height: 30,
       velocityY: 0,
-      gravity: 0.6,
+      gravity: 0.35,
       gravityDirection: 1,
       flipCooldown: 0
     };
@@ -265,7 +265,7 @@ footer {
     let obstacles = [];
     let obstacleTimer = 0;
     const obstacleInterval = 90;
-    let gameSpeed = 4;
+    let gameSpeed = 2.5;
 
     // Particles for trail effect
     let particles = [];
@@ -290,7 +290,7 @@ footer {
       obstacles = [];
       particles = [];
       obstacleTimer = 0;
-      gameSpeed = 4;
+      gameSpeed = 2.5;
       score = 0;
       scoreElement.textContent = '0';
       gameOver = false;
@@ -301,7 +301,7 @@ footer {
       if (player.flipCooldown <= 0) {
         player.gravityDirection *= -1;
         player.velocityY = player.gravityDirection * 3;
-        player.flipCooldown = 10;
+        player.flipCooldown = 5;
 
         // Add flip particles
         for (let i = 0; i < 10; i++) {
@@ -385,7 +385,7 @@ footer {
 
           // Increase difficulty
           if (score % 5 === 0) {
-            gameSpeed = Math.min(8, gameSpeed + 0.3);
+            gameSpeed = Math.min(5, gameSpeed + 0.2);
           }
         }
 
