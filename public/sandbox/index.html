@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Oria Sandbox - Play retro arcade games built with AI. Classic games reimagined with a modern dark theme.">
+<meta name="author" content="Oria">
+
+<title>Sandbox - Oria</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e4e4e7;
+  min-height: 100vh;
+}
+
+header {
+  padding: 2rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 14, 39, 0.7);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+nav a {
+  color: #a1a1aa;
+  text-decoration: none;
+  margin-left: 2rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+nav a:hover {
+  color: #6366f1;
+}
+
+.hero {
+  text-align: center;
+  padding: 4rem 5% 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: 1.125rem;
+  color: #a1a1aa;
+  line-height: 1.7;
+}
+
+.games-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 5%;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #ffffff;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.game-card {
+  background: rgba(30, 30, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: block;
+}
+
+.game-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+}
+
+.game-preview {
+  height: 160px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+}
+
+.game-info {
+  padding: 1.5rem;
+}
+
+.game-info h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.game-info p {
+  color: #a1a1aa;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.play-btn {
+  display: inline-flex;
+  align-items: center;
+  color: #6366f1;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.play-btn::after {
+  content: '→';
+  margin-left: 0.5rem;
+  transition: margin-left 0.3s ease;
+}
+
+.game-card:hover .play-btn {
+  color: #a855f7;
+}
+
+.game-card:hover .play-btn::after {
+  margin-left: 0.75rem;
+}
+
+footer {
+  text-align: center;
+  padding: 3rem 5%;
+  color: #71717a;
+  border-top: 1px solid rgba(99, 102, 241, 0.1);
+  margin-top: 4rem;
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .games-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+  <header>
+    <a href="../index.html" class="logo">ORIA</a>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+      <a href="../blog/">Blog</a>
+      <a href="index.html">Sandbox</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Oria Sandbox</h1>
+    <p>Classic arcade games reimagined. Built with AI, designed for fun. Play directly in your browser with no downloads required.</p>
+  </section>
+
+  <section class="games-section">
+    <h2 class="section-title">Arcade Games</h2>
+    <div class="games-grid">
+      <a href="snake.html" class="game-card">
+        <div class="game-preview">🐍</div>
+        <div class="game-info">
+          <h3>Snake</h3>
+          <p>The classic snake game. Eat food, grow longer, and avoid hitting the walls or yourself.</p>
+          <span class="play-btn">Play now</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 Oria. Powered by artificial intelligence.</p>
+  </footer>
+</body>
+</html>
