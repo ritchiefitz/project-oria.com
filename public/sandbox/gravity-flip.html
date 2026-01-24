@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Gravity Flip - A gravity-defying arcade game. Flip gravity to avoid obstacles and survive as long as you can!">
+<title>Gravity Flip - Oria Sandbox</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e4e4e7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  padding: 1.5rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 14, 39, 0.7);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.logo {
+  font-size: 1.75rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+}
+
+nav a {
+  color: #a1a1aa;
+  text-decoration: none;
+  margin-left: 1.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+nav a:hover {
+  color: #6366f1;
+}
+
+.game-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 1.5rem;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  padding: 0 1rem;
+}
+
+.game-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.score-display {
+  display: flex;
+  gap: 2rem;
+  font-size: 1.125rem;
+}
+
+.score-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.score-label {
+  color: #a1a1aa;
+}
+
+.score-value {
+  color: #6366f1;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+#gameCanvas {
+  border: 2px solid rgba(99, 102, 241, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.2);
+  background: #0a0e27;
+  max-width: 100%;
+  touch-action: manipulation;
+}
+
+.controls-info {
+  text-align: center;
+  color: #a1a1aa;
+  max-width: 600px;
+}
+
+.controls-info h3 {
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.controls-info p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.control-keys {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.key {
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #6366f1;
+  font-size: 0.875rem;
+}
+
+.mobile-btn {
+  display: none;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  color: white;
+  border: none;
+  padding: 1.25rem 3rem;
+  border-radius: 12px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+}
+
+.mobile-btn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .mobile-btn {
+    display: block;
+  }
+
+  .control-keys {
+    display: none;
+  }
+
+  .game-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+
+footer {
+  text-align: center;
+  padding: 1.5rem 5%;
+  color: #71717a;
+  border-top: 1px solid rgba(99, 102, 241, 0.1);
+  font-size: 0.875rem;
+}
+</style>
+</head>
+<body>
+  <header>
+    <a href="../index.html" class="logo">ORIA</a>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../blog/">Blog</a>
+      <a href="index.html">Sandbox</a>
+    </nav>
+  </header>
+
+  <div class="game-container">
+    <div class="game-header">
+      <h1 class="game-title">Gravity Flip</h1>
+      <div class="score-display">
+        <div class="score-item">
+          <span class="score-label">Score:</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-item">
+          <span class="score-label">Best:</span>
+          <span class="score-value" id="highScore">0</span>
+        </div>
+      </div>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+    <button class="mobile-btn" id="flipBtn">FLIP GRAVITY</button>
+
+    <div class="controls-info">
+      <h3>How to Play</h3>
+      <p>Flip gravity to navigate through obstacles. The longer you survive, the higher your score!</p>
+      <div class="control-keys">
+        <span class="key">SPACE</span>
+        <span class="key">W</span>
+        <span class="key">UP ARROW</span>
+        <span class="key">CLICK</span>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Oria. Powered by artificial intelligence.</p>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreElement = document.getElementById('score');
+    const highScoreElement = document.getElementById('highScore');
+    const flipBtn = document.getElementById('flipBtn');
+
+    // Game state
+    let gameRunning = false;
+    let gameOver = false;
+    let score = 0;
+    let highScore = parseInt(localStorage.getItem('gravityFlipHighScore')) || 0;
+    highScoreElement.textContent = highScore;
+
+    // Player
+    const player = {
+      x: 120,
+      y: canvas.height / 2,
+      width: 30,
+      height: 30,
+      velocityY: 0,
+      gravity: 0.6,
+      gravityDirection: 1,
+      flipCooldown: 0
+    };
+
+    // Obstacles
+    let obstacles = [];
+    let obstacleTimer = 0;
+    const obstacleInterval = 90;
+    let gameSpeed = 4;
+
+    // Particles for trail effect
+    let particles = [];
+
+    // Colors
+    const colors = {
+      player: '#6366f1',
+      playerGlow: 'rgba(99, 102, 241, 0.5)',
+      obstacle: '#a855f7',
+      obstacleGlow: 'rgba(168, 85, 247, 0.3)',
+      particle: '#818cf8',
+      background: '#0a0e27',
+      ground: 'rgba(99, 102, 241, 0.3)',
+      text: '#ffffff'
+    };
+
+    function resetGame() {
+      player.y = canvas.height / 2;
+      player.velocityY = 0;
+      player.gravityDirection = 1;
+      player.flipCooldown = 0;
+      obstacles = [];
+      particles = [];
+      obstacleTimer = 0;
+      gameSpeed = 4;
+      score = 0;
+      scoreElement.textContent = '0';
+      gameOver = false;
+      gameRunning = true;
+    }
+
+    function flipGravity() {
+      if (player.flipCooldown <= 0) {
+        player.gravityDirection *= -1;
+        player.velocityY = player.gravityDirection * 3;
+        player.flipCooldown = 10;
+
+        // Add flip particles
+        for (let i = 0; i < 10; i++) {
+          particles.push({
+            x: player.x + player.width / 2,
+            y: player.y + player.height / 2,
+            vx: (Math.random() - 0.5) * 8,
+            vy: (Math.random() - 0.5) * 8,
+            life: 30,
+            maxLife: 30,
+            size: Math.random() * 6 + 2
+          });
+        }
+      }
+    }
+
+    function createObstacle() {
+      const gapSize = 150 + Math.random() * 50;
+      const gapPosition = 80 + Math.random() * (canvas.height - gapSize - 160);
+
+      obstacles.push({
+        x: canvas.width,
+        gapY: gapPosition,
+        gapHeight: gapSize,
+        width: 60,
+        passed: false
+      });
+    }
+
+    function updatePlayer() {
+      // Apply gravity
+      player.velocityY += player.gravity * player.gravityDirection;
+      player.velocityY = Math.max(-15, Math.min(15, player.velocityY));
+      player.y += player.velocityY;
+
+      // Cooldown
+      if (player.flipCooldown > 0) player.flipCooldown--;
+
+      // Boundary collision
+      const topBound = 40;
+      const bottomBound = canvas.height - 40;
+
+      if (player.y < topBound) {
+        player.y = topBound;
+        player.velocityY = 0;
+      }
+      if (player.y + player.height > bottomBound) {
+        player.y = bottomBound - player.height;
+        player.velocityY = 0;
+      }
+
+      // Trail particles
+      if (gameRunning && Math.random() > 0.5) {
+        particles.push({
+          x: player.x,
+          y: player.y + player.height / 2 + (Math.random() - 0.5) * 10,
+          vx: -2,
+          vy: (Math.random() - 0.5) * 2,
+          life: 20,
+          maxLife: 20,
+          size: Math.random() * 4 + 2
+        });
+      }
+    }
+
+    function updateObstacles() {
+      obstacleTimer++;
+      if (obstacleTimer >= obstacleInterval) {
+        createObstacle();
+        obstacleTimer = 0;
+      }
+
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        obstacles[i].x -= gameSpeed;
+
+        // Score when passing
+        if (!obstacles[i].passed && obstacles[i].x + obstacles[i].width < player.x) {
+          obstacles[i].passed = true;
+          score++;
+          scoreElement.textContent = score;
+
+          // Increase difficulty
+          if (score % 5 === 0) {
+            gameSpeed = Math.min(8, gameSpeed + 0.3);
+          }
+        }
+
+        // Remove off-screen
+        if (obstacles[i].x + obstacles[i].width < 0) {
+          obstacles.splice(i, 1);
+        }
+      }
+    }
+
+    function updateParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].x += particles[i].vx;
+        particles[i].y += particles[i].vy;
+        particles[i].life--;
+
+        if (particles[i].life <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+    }
+
+    function checkCollision() {
+      for (const obs of obstacles) {
+        // Check if player is in obstacle's x range
+        if (player.x + player.width > obs.x && player.x < obs.x + obs.width) {
+          // Check if player is NOT in the gap
+          if (player.y < obs.gapY || player.y + player.height > obs.gapY + obs.gapHeight) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function drawBackground() {
+      ctx.fillStyle = colors.background;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw boundary lines
+      ctx.strokeStyle = colors.ground;
+      ctx.lineWidth = 3;
+
+      // Top boundary
+      ctx.beginPath();
+      ctx.moveTo(0, 40);
+      ctx.lineTo(canvas.width, 40);
+      ctx.stroke();
+
+      // Bottom boundary
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height - 40);
+      ctx.lineTo(canvas.width, canvas.height - 40);
+      ctx.stroke();
+
+      // Grid lines for effect
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.05)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
+
+    function drawPlayer() {
+      // Glow effect
+      ctx.shadowColor = colors.playerGlow;
+      ctx.shadowBlur = 20;
+
+      // Player body
+      ctx.fillStyle = colors.player;
+      ctx.beginPath();
+
+      // Draw a directional arrow shape
+      const cx = player.x + player.width / 2;
+      const cy = player.y + player.height / 2;
+      const size = player.width / 2;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(player.gravityDirection > 0 ? Math.PI / 2 : -Math.PI / 2);
+
+      ctx.beginPath();
+      ctx.moveTo(size, 0);
+      ctx.lineTo(-size, -size * 0.7);
+      ctx.lineTo(-size * 0.3, 0);
+      ctx.lineTo(-size, size * 0.7);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+      ctx.shadowBlur = 0;
+    }
+
+    function drawObstacles() {
+      ctx.shadowColor = colors.obstacleGlow;
+      ctx.shadowBlur = 15;
+
+      for (const obs of obstacles) {
+        ctx.fillStyle = colors.obstacle;
+
+        // Top obstacle
+        ctx.fillRect(obs.x, 40, obs.width, obs.gapY - 40);
+
+        // Bottom obstacle
+        ctx.fillRect(obs.x, obs.gapY + obs.gapHeight, obs.width, canvas.height - 40 - obs.gapY - obs.gapHeight);
+
+        // Obstacle edges glow
+        ctx.fillStyle = 'rgba(168, 85, 247, 0.6)';
+        ctx.fillRect(obs.x, obs.gapY - 5, obs.width, 5);
+        ctx.fillRect(obs.x, obs.gapY + obs.gapHeight, obs.width, 5);
+      }
+
+      ctx.shadowBlur = 0;
+    }
+
+    function drawParticles() {
+      for (const p of particles) {
+        const alpha = p.life / p.maxLife;
+        ctx.fillStyle = `rgba(129, 140, 248, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawUI() {
+      if (!gameRunning && !gameOver) {
+        // Start screen
+        ctx.fillStyle = 'rgba(10, 14, 39, 0.8)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = colors.text;
+        ctx.font = 'bold 48px Inter, system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('GRAVITY FLIP', canvas.width / 2, canvas.height / 2 - 40);
+
+        ctx.font = '24px Inter, system-ui, sans-serif';
+        ctx.fillStyle = '#a1a1aa';
+        ctx.fillText('Press SPACE or tap to start', canvas.width / 2, canvas.height / 2 + 20);
+
+        ctx.font = '18px Inter, system-ui, sans-serif';
+        ctx.fillText('Flip gravity to navigate through obstacles', canvas.width / 2, canvas.height / 2 + 60);
+      }
+
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(10, 14, 39, 0.85)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 48px Inter, system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 50);
+
+        ctx.fillStyle = colors.text;
+        ctx.font = '32px Inter, system-ui, sans-serif';
+        ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
+
+        if (score >= highScore && score > 0) {
+          ctx.fillStyle = '#22c55e';
+          ctx.font = '24px Inter, system-ui, sans-serif';
+          ctx.fillText('NEW HIGH SCORE!', canvas.width / 2, canvas.height / 2 + 50);
+        }
+
+        ctx.fillStyle = '#a1a1aa';
+        ctx.font = '20px Inter, system-ui, sans-serif';
+        ctx.fillText('Press SPACE or tap to restart', canvas.width / 2, canvas.height / 2 + 100);
+      }
+    }
+
+    function gameLoop() {
+      drawBackground();
+      drawParticles();
+      drawObstacles();
+      drawPlayer();
+      drawUI();
+
+      if (gameRunning && !gameOver) {
+        updatePlayer();
+        updateObstacles();
+        updateParticles();
+
+        if (checkCollision()) {
+          gameOver = true;
+          gameRunning = false;
+
+          if (score > highScore) {
+            highScore = score;
+            highScoreElement.textContent = highScore;
+            localStorage.setItem('gravityFlipHighScore', highScore);
+          }
+
+          // Explosion particles
+          for (let i = 0; i < 30; i++) {
+            particles.push({
+              x: player.x + player.width / 2,
+              y: player.y + player.height / 2,
+              vx: (Math.random() - 0.5) * 15,
+              vy: (Math.random() - 0.5) * 15,
+              life: 40,
+              maxLife: 40,
+              size: Math.random() * 8 + 3
+            });
+          }
+        }
+      }
+
+      updateParticles();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function handleInput() {
+      if (!gameRunning && !gameOver) {
+        resetGame();
+      } else if (gameOver) {
+        resetGame();
+      } else if (gameRunning) {
+        flipGravity();
+      }
+    }
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.code === 'KeyW' || e.code === 'ArrowUp') {
+        e.preventDefault();
+        handleInput();
+      }
+    });
+
+    // Mouse/touch controls
+    canvas.addEventListener('click', handleInput);
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      handleInput();
+    });
+
+    // Mobile button
+    flipBtn.addEventListener('click', handleInput);
+    flipBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      handleInput();
+    });
+
+    // Start game loop
+    gameLoop();
+  </script>
+</body>
+</html>
