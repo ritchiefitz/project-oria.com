@@ -1,14 +1,56 @@
 {
   "weeks": [
     {
-      "weekOf": "January 25, 2026",
+      "weekOf": "February 1, 2026",
       "resultsAdded": false,
+      "picks": [
+        {
+          "ticker": "NVDA",
+          "company": "NVIDIA Corporation",
+          "startPrice": 177.83,
+          "targetPrice": 189.00,
+          "reasoning": "$500B Blackwell revenue visibility through 2026, 66% data center growth momentum"
+        },
+        {
+          "ticker": "META",
+          "company": "Meta Platforms Inc.",
+          "startPrice": 677.41,
+          "targetPrice": 725.00,
+          "reasoning": "Analyst target $825, vying to be first $2T company, Strong Buy consensus"
+        },
+        {
+          "ticker": "AVGO",
+          "company": "Broadcom Inc.",
+          "startPrice": 310.51,
+          "targetPrice": 333.00,
+          "reasoning": "AI semiconductor 74% growth, analyst avg target $458, 50 buy ratings"
+        },
+        {
+          "ticker": "SHOP",
+          "company": "Shopify Inc.",
+          "startPrice": 108.50,
+          "targetPrice": 120.00,
+          "reasoning": "Analyst target $181 (52% upside), oversold setup, e-commerce AI integration"
+        },
+        {
+          "ticker": "TSLA",
+          "company": "Tesla Inc.",
+          "startPrice": 400.67,
+          "targetPrice": 428.00,
+          "reasoning": "$20B 2026 capex for AI/robots, FSD V13 rollout, physical AI pivots ahead"
+        }
+      ]
+    },
+    {
+      "weekOf": "January 25, 2026",
+      "resultsAdded": true,
       "picks": [
         {
           "ticker": "AMD",
           "company": "Advanced Micro Devices",
           "startPrice": 259.68,
           "targetPrice": 275.00,
+          "actualPrice": 187.75,
           "reasoning": "Earnings Feb 3 catalyst, MI450 GPU launch competing with NVIDIA"
         },
         {
@@ -16,6 +58,7 @@
           "company": "Robinhood Markets",
           "startPrice": 106.61,
           "targetPrice": 113.00,
+          "actualPrice": 74.16,
           "reasoning": "Zacks Rank #1 Strong Buy, strong momentum, analyst target $120"
         },
         {
@@ -23,6 +66,7 @@
           "company": "MongoDB Inc.",
           "startPrice": 399.00,
           "targetPrice": 420.00,
+          "actualPrice": 369.75,
           "reasoning": "AI database demand surge, Momentum Score A, up 54% YoY"
         },
         {
@@ -30,6 +74,7 @@
           "company": "Ciena Corporation",
           "startPrice": 229.88,
           "targetPrice": 245.00,
+          "actualPrice": 243.50,
           "reasoning": "20% revenue growth, raised FY26 guidance to $6.1B on AI demand"
         },
         {
@@ -37,6 +82,7 @@
           "company": "Salesforce Inc.",
           "startPrice": 227.98,
           "targetPrice": 242.00,
+          "actualPrice": 199.99,
           "reasoning": "Oversold 32% decline, analysts see 44% upside, Agentforce AI platform"
         }
       ]

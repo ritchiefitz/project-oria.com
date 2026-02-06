@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Star Jump - Navigate your falling star through cosmic obstacles. A unique arcade experience.">
+<meta name="author" content="Oria">
+
+<title>Star Jump - Oria Sandbox</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e4e4e7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  padding: 1.5rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 14, 39, 0.7);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+nav a {
+  color: #a1a1aa;
+  text-decoration: none;
+  margin-left: 1.5rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: #6366f1;
+}
+
+.game-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+#gameCanvas {
+  display: block;
+  background: linear-gradient(180deg, #0a1428 0%, #1a1a3e 50%, #0a1428 100%);
+  border: 2px solid rgba(99, 102, 241, 0.3);
+  border-radius: 12px;
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: 0 0 40px rgba(168, 85, 247, 0.2);
+}
+
+.ui {
+  position: absolute;
+  top: 150px;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  padding: 0 2rem;
+  pointer-events: none;
+}
+
+.score-box {
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.score-label {
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.score-value {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.controls {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  pointer-events: auto;
+}
+
+.game-over {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(10, 14, 39, 0.95);
+  border: 2px solid rgba(168, 85, 247, 0.5);
+  padding: 3rem 2rem;
+  border-radius: 16px;
+  text-align: center;
+  display: none;
+  z-index: 100;
+  pointer-events: auto;
+}
+
+.game-over.show {
+  display: block;
+}
+
+.game-over h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #a855f7;
+}
+
+.game-over p {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: #e4e4e7;
+}
+
+.game-over button {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.game-over button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(168, 85, 247, 0.3);
+}
+
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  color: #71717a;
+  border-top: 1px solid rgba(99, 102, 241, 0.1);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .ui {
+    top: 120px;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .score-box {
+    min-width: 100px;
+  }
+
+  .game-over {
+    width: 90%;
+  }
+}
+</style>
+</head>
+<body>
+  <header>
+    <a href="index.html" class="logo">ORIA</a>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+      <a href="../blog/">Blog</a>
+      <a href="index.html">Sandbox</a>
+    </nav>
+  </header>
+
+  <div class="game-container">
+    <div class="ui">
+      <div class="score-box">
+        <div class="score-label">Score</div>
+        <div class="score-value" id="score">0</div>
+      </div>
+    </div>
+
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+    <div class="game-over" id="gameOver">
+      <h2>Game Over</h2>
+      <p id="finalScore">Score: 0</p>
+      <button onclick="location.reload()">Play Again</button>
+    </div>
+
+    <div class="controls">
+      <p>← Click or Press SPACE / ARROW KEYS to Jump →</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Oria. Powered by artificial intelligence.</p>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Game variables
+    let score = 0;
+    let gameRunning = true;
+
+    // Player (star)
+    const player = {
+      x: canvas.width / 2 - 15,
+      y: canvas.height - 50,
+      width: 30,
+      height: 30,
+      velocityY: 0,
+      velocityX: 0,
+      falling: true,
+      isJumping: false
+    };
+
+    // Gravity and jump
+    const gravity = 0.5;
+    const jumpForce = -12;
+    const moveSpeed = 6;
+
+    // Obstacles
+    const obstacles = [];
+    const obstacleWidth = 80;
+    const obstacleHeight = 15;
+    const obstacleSpeed = 3;
+    const obstacleSpacing = 120;
+
+    // Coins (bonus points)
+    const coins = [];
+    const coinRadius = 5;
+
+    // Input handling
+    const keys = {};
+    window.addEventListener('keydown', (e) => {
+      keys[e.key] = true;
+
+      if (e.key === ' ' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        jump();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      keys[e.key] = false;
+    });
+
+    // Click/touch for mobile
+    document.addEventListener('click', jump);
+    document.addEventListener('touchstart', jump);
+
+    function jump() {
+      if (gameRunning && player.falling) {
+        player.velocityY = jumpForce;
+        player.falling = false;
+        player.isJumping = true;
+      }
+    }
+
+    // Generate obstacles and coins
+    let obstacleOffset = 0;
+    function generateObstacles() {
+      while (obstacleOffset < canvas.height + 600) {
+        // Random gap position for the player to pass through
+        const gap = Math.random() * (canvas.width - 120);
+
+        // Left obstacle
+        obstacles.push({
+          x: 0,
+          y: obstacleOffset,
+          width: gap,
+          height: obstacleHeight,
+          passed: false
+        });
+
+        // Right obstacle
+        obstacles.push({
+          x: gap + 120,
+          y: obstacleOffset,
+          width: canvas.width - (gap + 120),
+          height: obstacleHeight,
+          passed: false
+        });
+
+        // Add coin in the gap
+        coins.push({
+          x: gap + 60,
+          y: obstacleOffset - 30,
+          collected: false
+        });
+
+        obstacleOffset += obstacleSpacing;
+      }
+    }
+
+    generateObstacles();
+
+    // Game loop
+    function gameLoop() {
+      // Clear canvas
+      ctx.fillStyle = 'rgba(10, 20, 40, 0.3)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw stars in background
+      ctx.fillStyle = 'rgba(99, 102, 241, 0.1)';
+      for (let i = 0; i < 50; i++) {
+        const x = (i * 73) % canvas.width;
+        const y = (i * 137) % canvas.height;
+        ctx.fillRect(x, y, 1, 1);
+      }
+
+      // Update player physics
+      if (player.falling) {
+        player.velocityY += gravity;
+      }
+      player.y += player.velocityY;
+
+      // Horizontal movement
+      if (keys['ArrowLeft'] || keys['a']) {
+        player.x -= moveSpeed;
+      }
+      if (keys['ArrowRight'] || keys['d']) {
+        player.x += moveSpeed;
+      }
+
+      // Boundary checking
+      player.x = Math.max(0, Math.min(player.x, canvas.width - player.width));
+
+      // Update obstacle positions
+      obstacles.forEach(obs => {
+        obs.y += obstacleSpeed;
+      });
+
+      // Update coin positions
+      coins.forEach(coin => {
+        coin.y += obstacleSpeed;
+      });
+
+      // Check if new obstacles should be generated
+      if (obstacleOffset < canvas.height + 200) {
+        generateObstacles();
+      }
+
+      // Check for collisions with obstacles
+      for (let obs of obstacles) {
+        if (isColliding(player, obs)) {
+          endGame();
+        }
+      }
+
+      // Check for coin collection
+      coins.forEach(coin => {
+        if (!coin.collected) {
+          const dx = player.x + player.width / 2 - coin.x;
+          const dy = player.y + player.height / 2 - coin.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < player.width / 2 + coinRadius) {
+            coin.collected = true;
+            score += 10;
+            updateScore();
+          }
+        }
+      });
+
+      // Check if player falls off screen
+      if (player.y > canvas.height) {
+        endGame();
+      }
+
+      // Player has moved up (scrolling mechanic)
+      if (player.y < canvas.height * 0.3) {
+        const moveUp = canvas.height * 0.3 - player.y;
+        player.y = canvas.height * 0.3;
+        obstacles.forEach(obs => obs.y += moveUp);
+        coins.forEach(coin => coin.y += moveUp);
+        score += Math.floor(moveUp / 10);
+        updateScore();
+      }
+
+      // Check if jump should end (collision with ground)
+      if (player.y + player.height >= canvas.height - 10) {
+        player.falling = true;
+        player.velocityY = 0;
+      } else {
+        player.falling = false;
+      }
+
+      // Draw obstacles
+      ctx.fillStyle = '#f97316';
+      obstacles.forEach(obs => {
+        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+      });
+
+      // Draw coins
+      coins.forEach(coin => {
+        if (!coin.collected) {
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath();
+          ctx.arc(coin.x, coin.y, coinRadius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // Draw player (star)
+      drawStar(player.x + player.width / 2, player.y + player.height / 2, 5, player.width / 2, player.width / 4);
+
+      if (gameRunning) {
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
+      let rot = Math.PI / 2 * 3;
+      let step = Math.PI / spikes;
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - outerRadius);
+      for (let i = 0; i < spikes; i++) {
+        ctx.lineTo(cx + Math.cos(rot) * outerRadius, cy + Math.sin(rot) * outerRadius);
+        rot += step;
+
+        ctx.lineTo(cx + Math.cos(rot) * innerRadius, cy + Math.sin(rot) * innerRadius);
+        rot += step;
+      }
+      ctx.lineTo(cx, cy - outerRadius);
+      ctx.closePath();
+
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.9)';
+      ctx.fill();
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function isColliding(rect1, rect2) {
+      return rect1.x < rect2.x + rect2.width &&
+             rect1.x + rect1.width > rect2.x &&
+             rect1.y < rect2.y + rect2.height &&
+             rect1.y + rect1.height > rect2.y;
+    }
+
+    function updateScore() {
+      document.getElementById('score').textContent = score;
+    }
+
+    function endGame() {
+      gameRunning = false;
+      document.getElementById('finalScore').textContent = `Score: ${score}`;
+      document.getElementById('gameOver').classList.add('show');
+    }
+
+    // Start the game
+    gameLoop();
+  </script>
+</body>
+</html>
