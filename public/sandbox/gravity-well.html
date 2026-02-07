@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gravity Well - Oria Sandbox</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e4e4e7;
+  min-height: 100vh;
+  overflow: hidden;
+}
+header {
+  padding: 1rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 14, 39, 0.7);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+}
+nav a {
+  color: #a1a1aa;
+  text-decoration: none;
+  margin-left: 1.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+nav a:hover { color: #6366f1; }
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  height: calc(100vh - 60px);
+}
+.game-hud {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(30, 30, 46, 0.8);
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.hud-item {
+  text-align: center;
+}
+.hud-label {
+  font-size: 0.7rem;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.hud-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+canvas {
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  cursor: crosshair;
+  max-width: 100%;
+  touch-action: none;
+}
+.controls {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.btn {
+  padding: 0.5rem 1.5rem;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.15);
+  color: #c4b5fd;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.btn:hover {
+  background: rgba(99, 102, 241, 0.3);
+  border-color: #6366f1;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  border: none;
+  color: #fff;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: scale(1.03);
+}
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 14, 39, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.overlay-box {
+  text-align: center;
+  padding: 2.5rem;
+  background: rgba(30, 30, 46, 0.95);
+  border-radius: 20px;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  max-width: 400px;
+}
+.overlay-box h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.overlay-box p {
+  color: #a1a1aa;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+.overlay-box .btn { margin: 0.25rem; }
+.instructions {
+  font-size: 0.75rem;
+  color: #71717a;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+footer {
+  text-align: center;
+  padding: 0.5rem;
+  color: #71717a;
+  font-size: 0.75rem;
+}
+@media (max-width: 768px) {
+  .game-hud { gap: 1rem; padding: 0.5rem 1rem; }
+  .hud-value { font-size: 1rem; }
+  header { padding: 0.75rem 3%; }
+  nav a { margin-left: 0.75rem; font-size: 0.8rem; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="logo">ORIA</a>
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="../about.html">About</a>
+    <a href="../blog/">Blog</a>
+    <a href="index.html">Sandbox</a>
+  </nav>
+</header>
+
+<div class="game-container">
+  <div class="game-hud">
+    <div class="hud-item"><div class="hud-label">Level</div><div class="hud-value" id="level">1</div></div>
+    <div class="hud-item"><div class="hud-label">Score</div><div class="hud-value" id="score">0</div></div>
+    <div class="hud-item"><div class="hud-label">Wells Left</div><div class="hud-value" id="wells">5</div></div>
+    <div class="hud-item"><div class="hud-label">Best</div><div class="hud-value" id="best">0</div></div>
+  </div>
+  <canvas id="gameCanvas"></canvas>
+  <div class="controls">
+    <button class="btn btn-primary" id="launchBtn" onclick="launchParticle()">Launch (Space)</button>
+    <button class="btn" onclick="resetLevel()">Reset (R)</button>
+    <button class="btn" onclick="clearWells()">Clear Wells (C)</button>
+  </div>
+  <div class="instructions">Click to place gravity wells. Right-click to remove. Space to launch. Guide the particle to the portal.</div>
+</div>
+
+<div class="overlay" id="startOverlay">
+  <div class="overlay-box">
+    <h2>Gravity Well</h2>
+    <p>Place gravity wells to bend the path of a particle and guide it into the portal. Use as few wells as possible for bonus points!</p>
+    <button class="btn btn-primary" onclick="startGame()">Start Game</button>
+  </div>
+</div>
+
+<div class="overlay" id="winOverlay" style="display:none">
+  <div class="overlay-box">
+    <h2>Level Complete!</h2>
+    <p id="winText">Nice work!</p>
+    <button class="btn btn-primary" onclick="nextLevel()">Next Level</button>
+  </div>
+</div>
+
+<div class="overlay" id="failOverlay" style="display:none">
+  <div class="overlay-box">
+    <h2>Missed!</h2>
+    <p>The particle didn't reach the portal. Try adjusting your gravity wells.</p>
+    <button class="btn btn-primary" onclick="resetLevel()">Retry</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let W, H;
+function resize() {
+  const maxW = Math.min(window.innerWidth - 32, 900);
+  const maxH = Math.min(window.innerHeight - 220, 550);
+  W = canvas.width = maxW;
+  H = canvas.height = maxH;
+}
+resize();
+window.addEventListener('resize', () => { resize(); if (!state.launched) drawScene(); });
+
+const state = {
+  level: 1,
+  score: 0,
+  best: parseInt(localStorage.getItem('gravityWellBest') || '0'),
+  maxWells: 5,
+  wells: [],
+  particle: null,
+  target: null,
+  obstacles: [],
+  launched: false,
+  trail: [],
+  animId: null,
+  particleStartX: 0,
+  particleStartY: 0,
+};
+
+document.getElementById('best').textContent = state.best;
+
+function generateLevel(lvl) {
+  state.wells = [];
+  state.launched = false;
+  state.trail = [];
+
+  const margin = 60;
+  state.particleStartX = margin;
+  state.particleStartY = H / 2;
+  state.particle = { x: state.particleStartX, y: state.particleStartY, vx: 2.5, vy: 0, alive: true };
+  state.target = { x: W - margin, y: H / 2 + (lvl > 1 ? (Math.sin(lvl * 1.3) * (H * 0.3)) : 0), r: 20 };
+  state.maxWells = Math.max(3, 7 - Math.floor(lvl / 3));
+
+  // Generate obstacles for higher levels
+  state.obstacles = [];
+  if (lvl >= 2) {
+    const numObs = Math.min(lvl - 1, 5);
+    for (let i = 0; i < numObs; i++) {
+      const ox = W * 0.25 + (W * 0.5) * (i / Math.max(numObs - 1, 1));
+      const oy = H * 0.2 + Math.sin(i * 2.1 + lvl) * H * 0.25;
+      const ow = 12 + lvl * 2;
+      const oh = 60 + Math.abs(Math.cos(i + lvl)) * 80;
+      // Make sure obstacle doesn't overlap start or target
+      if (Math.abs(ox - state.particleStartX) > 80 && Math.abs(ox - state.target.x) > 80) {
+        state.obstacles.push({ x: ox - ow/2, y: oy - oh/2, w: ow, h: oh });
+      }
+    }
+  }
+
+  updateHUD();
+  if (state.animId) cancelAnimationFrame(state.animId);
+  drawScene();
+}
+
+function updateHUD() {
+  document.getElementById('level').textContent = state.level;
+  document.getElementById('score').textContent = state.score;
+  document.getElementById('wells').textContent = Math.max(0, state.maxWells - state.wells.length);
+  document.getElementById('best').textContent = state.best;
+  document.getElementById('launchBtn').disabled = state.launched;
+}
+
+function drawScene() {
+  ctx.clearRect(0, 0, W, H);
+  
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#0a0e27');
+  bg.addColorStop(0.5, '#111535');
+  bg.addColorStop(1, '#0d1229');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(99, 102, 241, 0.06)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  // Obstacles
+  state.obstacles.forEach(ob => {
+    const obg = ctx.createLinearGradient(ob.x, ob.y, ob.x + ob.w, ob.y + ob.h);
+    obg.addColorStop(0, 'rgba(239, 68, 68, 0.4)');
+    obg.addColorStop(1, 'rgba(239, 68, 68, 0.2)');
+    ctx.fillStyle = obg;
+    ctx.fillRect(ob.x, ob.y, ob.w, ob.h);
+    ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(ob.x, ob.y, ob.w, ob.h);
+  });
+
+  // Target portal
+  const t = state.target;
+  const time = Date.now() / 1000;
+  for (let i = 3; i >= 0; i--) {
+    const r = t.r + i * 6 + Math.sin(time * 2 + i) * 3;
+    const alpha = 0.15 - i * 0.03;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(52, 211, 153, ${alpha})`;
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(52, 211, 153, 0.4)';
+  ctx.fill();
+  ctx.strokeStyle = '#34d399';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // Spinning ring
+  ctx.beginPath();
+  ctx.arc(t.x, t.y, t.r + 4, time * 3, time * 3 + Math.PI * 1.2);
+  ctx.strokeStyle = 'rgba(52, 211, 153, 0.7)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Gravity wells
+  state.wells.forEach((w, i) => {
+    // Gravitational influence ring
+    for (let r = 3; r >= 0; r--) {
+      ctx.beginPath();
+      ctx.arc(w.x, w.y, 15 + r * 20, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(168, 85, 247, ${0.08 - r * 0.015})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    // Core
+    const wg = ctx.createRadialGradient(w.x, w.y, 0, w.x, w.y, 14);
+    wg.addColorStop(0, 'rgba(168, 85, 247, 0.9)');
+    wg.addColorStop(0.6, 'rgba(99, 102, 241, 0.5)');
+    wg.addColorStop(1, 'rgba(99, 102, 241, 0)');
+    ctx.beginPath();
+    ctx.arc(w.x, w.y, 14, 0, Math.PI * 2);
+    ctx.fillStyle = wg;
+    ctx.fill();
+    // Center dot
+    ctx.beginPath();
+    ctx.arc(w.x, w.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#c4b5fd';
+    ctx.fill();
+  });
+
+  // Trail
+  if (state.trail.length > 1) {
+    for (let i = 1; i < state.trail.length; i++) {
+      const alpha = i / state.trail.length;
+      ctx.beginPath();
+      ctx.moveTo(state.trail[i - 1].x, state.trail[i - 1].y);
+      ctx.lineTo(state.trail[i].x, state.trail[i].y);
+      ctx.strokeStyle = `rgba(99, 102, 241, ${alpha * 0.7})`;
+      ctx.lineWidth = 2 * alpha;
+      ctx.stroke();
+    }
+  }
+
+  // Particle
+  const p = state.particle;
+  if (p.alive) {
+    // Glow
+    const pg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 18);
+    pg.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+    pg.addColorStop(0.3, 'rgba(99, 102, 241, 0.6)');
+    pg.addColorStop(1, 'rgba(99, 102, 241, 0)');
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 18, 0, Math.PI * 2);
+    ctx.fillStyle = pg;
+    ctx.fill();
+    // Core
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+  }
+
+  // Predicted path (before launch)
+  if (!state.launched && state.wells.length > 0) {
+    drawPrediction();
+  }
+}
+
+function drawPrediction() {
+  let px = state.particle.x, py = state.particle.y;
+  let pvx = state.particle.vx, pvy = state.particle.vy;
+  const steps = 300;
+  const dt = 1;
+  
+  ctx.setLineDash([4, 8]);
+  ctx.beginPath();
+  ctx.moveTo(px, py);
+  
+  for (let i = 0; i < steps; i++) {
+    let ax = 0, ay = 0;
+    state.wells.forEach(w => {
+      const dx = w.x - px;
+      const dy = w.y - py;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const force = 300 / (dist * dist + 100);
+      ax += (dx / dist) * force;
+      ay += (dy / dist) * force;
+    });
+    pvx += ax * dt;
+    pvy += ay * dt;
+    const speed = Math.sqrt(pvx * pvx + pvy * pvy);
+    if (speed > 12) { pvx = (pvx / speed) * 12; pvy = (pvy / speed) * 12; }
+    px += pvx * dt;
+    py += pvy * dt;
+    
+    if (px < 0 || px > W || py < 0 || py > H) break;
+    
+    let hitObs = false;
+    for (const ob of state.obstacles) {
+      if (px > ob.x && px < ob.x + ob.w && py > ob.y && py < ob.y + ob.h) { hitObs = true; break; }
+    }
+    if (hitObs) break;
+    
+    ctx.lineTo(px, py);
+  }
+  
+  ctx.strokeStyle = 'rgba(99, 102, 241, 0.2)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function launchParticle() {
+  if (state.launched) return;
+  state.launched = true;
+  state.trail = [{ x: state.particle.x, y: state.particle.y }];
+  document.getElementById('launchBtn').disabled = true;
+  animate();
+}
+
+function animate() {
+  const p = state.particle;
+  if (!p.alive) return;
+
+  // Apply gravity from wells
+  let ax = 0, ay = 0;
+  state.wells.forEach(w => {
+    const dx = w.x - p.x;
+    const dy = w.y - p.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 8) return; // Prevent extreme forces at close range
+    const force = 300 / (dist * dist + 100);
+    ax += (dx / dist) * force;
+    ay += (dy / dist) * force;
+  });
+
+  p.vx += ax;
+  p.vy += ay;
+  // Speed cap
+  const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+  if (speed > 12) { p.vx = (p.vx / speed) * 12; p.vy = (p.vy / speed) * 12; }
+  
+  p.x += p.vx;
+  p.y += p.vy;
+  
+  state.trail.push({ x: p.x, y: p.y });
+  if (state.trail.length > 200) state.trail.shift();
+
+  // Check collision with obstacles
+  for (const ob of state.obstacles) {
+    if (p.x > ob.x && p.x < ob.x + ob.w && p.y > ob.y && p.y < ob.y + ob.h) {
+      p.alive = false;
+      drawScene();
+      setTimeout(() => document.getElementById('failOverlay').style.display = 'flex', 300);
+      return;
+    }
+  }
+
+  // Check if particle reached target
+  const dx = p.x - state.target.x;
+  const dy = p.y - state.target.y;
+  if (Math.sqrt(dx * dx + dy * dy) < state.target.r + 5) {
+    p.alive = false;
+    levelComplete();
+    return;
+  }
+
+  // Check if particle left bounds
+  if (p.x < -20 || p.x > W + 20 || p.y < -20 || p.y > H + 20) {
+    p.alive = false;
+    drawScene();
+    setTimeout(() => document.getElementById('failOverlay').style.display = 'flex', 300);
+    return;
+  }
+
+  drawScene();
+  state.animId = requestAnimationFrame(animate);
+}
+
+function levelComplete() {
+  const wellBonus = Math.max(0, (state.maxWells - state.wells.length)) * 50;
+  const levelPoints = state.level * 100;
+  const totalPoints = levelPoints + wellBonus;
+  state.score += totalPoints;
+  if (state.score > state.best) {
+    state.best = state.score;
+    localStorage.setItem('gravityWellBest', state.best);
+  }
+  updateHUD();
+  document.getElementById('winText').textContent = 
+    `+${levelPoints} level pts` + (wellBonus > 0 ? ` + ${wellBonus} well bonus` : '') + ` = ${totalPoints} points!`;
+  document.getElementById('winOverlay').style.display = 'flex';
+}
+
+function nextLevel() {
+  document.getElementById('winOverlay').style.display = 'none';
+  state.level++;
+  generateLevel(state.level);
+}
+
+function resetLevel() {
+  document.getElementById('failOverlay').style.display = 'none';
+  if (state.animId) cancelAnimationFrame(state.animId);
+  state.particle = { x: state.particleStartX, y: state.particleStartY, vx: 2.5, vy: 0, alive: true };
+  state.launched = false;
+  state.trail = [];
+  document.getElementById('launchBtn').disabled = false;
+  drawScene();
+}
+
+function clearWells() {
+  if (state.launched) return;
+  state.wells = [];
+  updateHUD();
+  drawScene();
+}
+
+function startGame() {
+  document.getElementById('startOverlay').style.display = 'none';
+  generateLevel(1);
+}
+
+// Mouse/touch handlers
+canvas.addEventListener('click', (e) => {
+  if (state.launched) return;
+  if (state.wells.length >= state.maxWells) return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = W / rect.width;
+  const scaleY = H / rect.height;
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
+  // Don't place on top of particle or target
+  const dp = Math.sqrt((x - state.particle.x) ** 2 + (y - state.particle.y) ** 2);
+  const dt = Math.sqrt((x - state.target.x) ** 2 + (y - state.target.y) ** 2);
+  if (dp < 30 || dt < 30) return;
+  state.wells.push({ x, y });
+  updateHUD();
+  drawScene();
+});
+
+canvas.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  if (state.launched) return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = W / rect.width;
+  const scaleY = H / rect.height;
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
+  // Find closest well and remove it
+  let closest = -1, closestDist = 40;
+  state.wells.forEach((w, i) => {
+    const d = Math.sqrt((x - w.x) ** 2 + (y - w.y) ** 2);
+    if (d < closestDist) { closest = i; closestDist = d; }
+  });
+  if (closest >= 0) {
+    state.wells.splice(closest, 1);
+    updateHUD();
+    drawScene();
+  }
+});
+
+// Touch support for mobile - long press to remove
+let touchTimer = null;
+let touchMoved = false;
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  touchMoved = false;
+  const touch = e.touches[0];
+  touchTimer = setTimeout(() => {
+    if (!touchMoved && !state.launched) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = W / rect.width;
+      const scaleY = H / rect.height;
+      const x = (touch.clientX - rect.left) * scaleX;
+      const y = (touch.clientY - rect.top) * scaleY;
+      let closest = -1, closestDist = 50;
+      state.wells.forEach((w, i) => {
+        const d = Math.sqrt((x - w.x) ** 2 + (y - w.y) ** 2);
+        if (d < closestDist) { closest = i; closestDist = d; }
+      });
+      if (closest >= 0) {
+        state.wells.splice(closest, 1);
+        updateHUD();
+        drawScene();
+        touchTimer = 'removed';
+      }
+    }
+  }, 500);
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+  touchMoved = true;
+  if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+  if (touchTimer === 'removed') { touchTimer = null; return; }
+  if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+  if (touchMoved || state.launched) return;
+  if (state.wells.length >= state.maxWells) return;
+  const touch = e.changedTouches[0];
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = W / rect.width;
+  const scaleY = H / rect.height;
+  const x = (touch.clientX - rect.left) * scaleX;
+  const y = (touch.clientY - rect.top) * scaleY;
+  const dp = Math.sqrt((x - state.particle.x) ** 2 + (y - state.particle.y) ** 2);
+  const dt = Math.sqrt((x - state.target.x) ** 2 + (y - state.target.y) ** 2);
+  if (dp < 30 || dt < 30) return;
+  state.wells.push({ x, y });
+  updateHUD();
+  drawScene();
+}, { passive: false });
+
+// Keyboard
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); launchParticle(); }
+  if (e.code === 'KeyR') resetLevel();
+  if (e.code === 'KeyC') clearWells();
+});
+
+// Initial draw
+drawScene();
+</script>
+</body>
+</html>

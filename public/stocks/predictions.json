@@ -1,14 +1,56 @@
 {
   "weeks": [
     {
-      "weekOf": "February 1, 2026",
+      "weekOf": "February 8, 2026",
       "resultsAdded": false,
+      "picks": [
+        {
+          "ticker": "AAPL",
+          "company": "Apple Inc.",
+          "startPrice": 278.12,
+          "targetPrice": 295.00,
+          "reasoning": "iPhone demand 'staggering' per Tim Cook, 16% revenue growth, CarPlay AI integration launching next month"
+        },
+        {
+          "ticker": "AVGO",
+          "company": "Broadcom Inc.",
+          "startPrice": 332.62,
+          "targetPrice": 355.00,
+          "reasoning": "Google's $175-185B AI spend fueling TPU chip orders, $21B in orders secured, earnings March 4 catalyst"
+        },
+        {
+          "ticker": "CIEN",
+          "company": "Ciena Corporation",
+          "startPrice": 274.95,
+          "targetPrice": 290.00,
+          "reasoning": "S&P 500 inclusion effective Feb 9 triggering index fund buying, 24% revenue growth on AI networking demand"
+        },
+        {
+          "ticker": "MU",
+          "company": "Micron Technology Inc.",
+          "startPrice": 394.69,
+          "targetPrice": 425.00,
+          "reasoning": "HBM4 production ramp for AI, 96% expected revenue growth, 20.67% earnings beat last quarter"
+        },
+        {
+          "ticker": "SHOP",
+          "company": "Shopify Inc.",
+          "startPrice": 112.35,
+          "targetPrice": 122.00,
+          "reasoning": "Upgraded to Buy at Arete, earnings Feb 18 with 27% revenue growth expected, oversold after 20% monthly decline"
+        }
+      ]
+    },
+    {
+      "weekOf": "February 1, 2026",
+      "resultsAdded": true,
       "picks": [
         {
           "ticker": "NVDA",
           "company": "NVIDIA Corporation",
           "startPrice": 177.83,
           "targetPrice": 189.00,
+          "actualPrice": 185.25,
           "reasoning": "$500B Blackwell revenue visibility through 2026, 66% data center growth momentum"
         },
         {
@@ -16,6 +58,7 @@
           "company": "Meta Platforms Inc.",
           "startPrice": 677.41,
           "targetPrice": 725.00,
+          "actualPrice": 661.46,
           "reasoning": "Analyst target $825, vying to be first $2T company, Strong Buy consensus"
         },
         {
@@ -23,6 +66,7 @@
           "company": "Broadcom Inc.",
           "startPrice": 310.51,
           "targetPrice": 333.00,
+          "actualPrice": 332.62,
           "reasoning": "AI semiconductor 74% growth, analyst avg target $458, 50 buy ratings"
         },
         {
@@ -30,6 +74,7 @@
           "company": "Shopify Inc.",
           "startPrice": 108.50,
           "targetPrice": 120.00,
+          "actualPrice": 112.35,
           "reasoning": "Analyst target $181 (52% upside), oversold setup, e-commerce AI integration"
         },
         {
@@ -37,6 +82,7 @@
           "company": "Tesla Inc.",
           "startPrice": 400.67,
           "targetPrice": 428.00,
+          "actualPrice": 411.78,
           "reasoning": "$20B 2026 capex for AI/robots, FSD V13 rollout, physical AI pivots ahead"
         }
       ]
