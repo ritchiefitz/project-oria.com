@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Phantom Maze - Navigate procedurally generated mazes with phasing walls, collect gems, and avoid shadow creatures.">
+<meta name="author" content="Oria">
+<title>Phantom Maze - Oria Sandbox</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e4e4e7;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+header {
+  padding: 1rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 14, 39, 0.7);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  z-index: 200;
+}
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+}
+nav a {
+  color: #a1a1aa;
+  text-decoration: none;
+  margin-left: 1.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+nav a:hover { color: #6366f1; }
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem;
+  flex: 1;
+  position: relative;
+}
+.game-hud {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.6rem 1.5rem;
+  background: rgba(30, 30, 46, 0.8);
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  z-index: 10;
+}
+.hud-item { text-align: center; }
+.hud-label {
+  font-size: 0.65rem;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.hud-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hud-value.lives { color: #ef4444; background: none; -webkit-text-fill-color: #ef4444; }
+.hud-value.gems-val { color: #2dd4bf; background: none; -webkit-text-fill-color: #2dd4bf; }
+canvas {
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  max-width: 100%;
+  display: block;
+}
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 14, 39, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: opacity 0.3s ease;
+}
+.overlay.hidden { display: none; }
+.overlay-box {
+  text-align: center;
+  padding: 2.5rem;
+  background: rgba(30, 30, 46, 0.95);
+  border-radius: 20px;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  max-width: 440px;
+  width: 90%;
+}
+.overlay-box h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.overlay-box h3 {
+  font-size: 1.1rem;
+  color: #a1a1aa;
+  margin-bottom: 1rem;
+  font-weight: 400;
+}
+.overlay-box p {
+  color: #a1a1aa;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+.overlay-box .final-score {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0.5rem 0 1rem;
+}
+.overlay-box .stat-line {
+  color: #71717a;
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+}
+.btn {
+  padding: 0.6rem 1.8rem;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.15);
+  color: #c4b5fd;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0.25rem;
+}
+.btn:hover {
+  background: rgba(99, 102, 241, 0.3);
+  border-color: #6366f1;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 2.5rem;
+  font-size: 1rem;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: scale(1.03);
+}
+.controls-info {
+  font-size: 0.75rem;
+  color: #71717a;
+  margin-top: 0.3rem;
+  text-align: center;
+}
+.key-hint {
+  display: inline-block;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.7rem;
+  color: #c4b5fd;
+  margin: 0 0.1rem;
+}
+.instructions-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 0.75rem;
+  text-align: left;
+  margin: 1rem 0;
+  font-size: 0.82rem;
+}
+.instructions-grid .icon { font-size: 1.1rem; }
+.instructions-grid .desc { color: #a1a1aa; }
+
+/* Mobile D-pad */
+.mobile-controls {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+}
+.dpad {
+  display: grid;
+  grid-template-columns: 56px 56px 56px;
+  grid-template-rows: 56px 56px 56px;
+  gap: 4px;
+}
+.dpad-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  background: rgba(30, 30, 46, 0.85);
+  color: #c4b5fd;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: background 0.15s;
+}
+.dpad-btn:active, .dpad-btn.pressed {
+  background: rgba(99, 102, 241, 0.4);
+  border-color: #6366f1;
+}
+.dpad-blank { visibility: hidden; }
+
+footer {
+  text-align: center;
+  padding: 0.5rem;
+  color: #71717a;
+  font-size: 0.75rem;
+  z-index: 10;
+}
+@media (max-width: 768px) {
+  .game-hud { gap: 0.75rem; padding: 0.4rem 0.75rem; }
+  .hud-value { font-size: 0.9rem; }
+  .hud-label { font-size: 0.6rem; }
+  header { padding: 0.75rem 3%; }
+  nav a { margin-left: 0.75rem; font-size: 0.8rem; }
+  .mobile-controls { display: block; }
+  .controls-info { display: none; }
+}
+@media (max-height: 700px) {
+  .game-hud { margin-bottom: 0.25rem; padding: 0.3rem 0.75rem; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="logo">ORIA</a>
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="index.html">Sandbox</a>
+  </nav>
+</header>
+
+<div class="game-container">
+  <div class="game-hud">
+    <div class="hud-item"><div class="hud-label">Level</div><div class="hud-value" id="hudLevel">1</div></div>
+    <div class="hud-item"><div class="hud-label">Score</div><div class="hud-value" id="hudScore">0</div></div>
+    <div class="hud-item"><div class="hud-label">Gems</div><div class="hud-value gems-val" id="hudGems">0/0</div></div>
+    <div class="hud-item"><div class="hud-label">Lives</div><div class="hud-value lives" id="hudLives">&#9829;&#9829;&#9829;</div></div>
+    <div class="hud-item"><div class="hud-label">Time</div><div class="hud-value" id="hudTime">0:00</div></div>
+  </div>
+  <canvas id="gameCanvas"></canvas>
+  <div class="controls-info">
+    <span class="key-hint">W</span><span class="key-hint">A</span><span class="key-hint">S</span><span class="key-hint">D</span> or
+    <span class="key-hint">&uarr;</span><span class="key-hint">&larr;</span><span class="key-hint">&darr;</span><span class="key-hint">&rarr;</span> to move
+  </div>
+</div>
+
+<!-- Mobile D-pad -->
+<div class="mobile-controls" id="mobileControls">
+  <div class="dpad">
+    <div class="dpad-btn dpad-blank"></div>
+    <div class="dpad-btn" id="dpadUp" data-dir="up">&uarr;</div>
+    <div class="dpad-btn dpad-blank"></div>
+    <div class="dpad-btn" id="dpadLeft" data-dir="left">&larr;</div>
+    <div class="dpad-btn dpad-blank"></div>
+    <div class="dpad-btn" id="dpadRight" data-dir="right">&rarr;</div>
+    <div class="dpad-btn dpad-blank"></div>
+    <div class="dpad-btn" id="dpadDown" data-dir="down">&darr;</div>
+    <div class="dpad-btn dpad-blank"></div>
+  </div>
+</div>
+
+<!-- Start Screen -->
+<div class="overlay" id="startOverlay">
+  <div class="overlay-box">
+    <h2>Phantom Maze</h2>
+    <h3>Navigate the shifting corridors</h3>
+    <div class="instructions-grid">
+      <div class="icon" style="color:#a855f7;">&#9679;</div>
+      <div class="desc">You are the glowing orb. Reach the exit after collecting all gems.</div>
+      <div class="icon" style="color:#2dd4bf;">&#9670;</div>
+      <div class="desc">Collect every gem to unlock the portal and advance.</div>
+      <div class="icon" style="color:#a855f7;opacity:0.5;">&#9645;</div>
+      <div class="desc">Phantom walls pulse and phase in/out. Time your moves!</div>
+      <div class="icon" style="color:#ef4444;">&#9684;</div>
+      <div class="desc">Shadow creatures patrol corridors. Avoid them or lose a life.</div>
+    </div>
+    <p style="font-size:0.8rem;color:#71717a;">Arrow keys / WASD to move. On mobile, use the on-screen D-pad.</p>
+    <button class="btn btn-primary" id="startBtn">Start Game</button>
+    <br><br>
+    <a href="index.html" style="color:#71717a;font-size:0.8rem;">Back to Sandbox</a>
+  </div>
+</div>
+
+<!-- Level Complete Screen -->
+<div class="overlay hidden" id="levelOverlay">
+  <div class="overlay-box">
+    <h2>Level Complete!</h2>
+    <p id="levelMsg">Prepare for the next maze...</p>
+    <div class="final-score" id="levelScore">0</div>
+    <div class="stat-line" id="levelTime"></div>
+    <button class="btn btn-primary" id="nextLevelBtn">Next Level</button>
+  </div>
+</div>
+
+<!-- Game Over Screen -->
+<div class="overlay hidden" id="gameOverOverlay">
+  <div class="overlay-box">
+    <h2>Game Over</h2>
+    <p>The shadows consumed you...</p>
+    <div class="final-score" id="finalScore">0</div>
+    <div class="stat-line" id="finalLevel"></div>
+    <div class="stat-line" id="finalTime"></div>
+    <br>
+    <button class="btn btn-primary" id="restartBtn">Play Again</button>
+    <br><br>
+    <a href="index.html" style="color:#71717a;font-size:0.8rem;">Back to Sandbox</a>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2025 Oria. Powered by artificial intelligence.</p>
+</footer>
+
+<script>
+// ======================
+// PHANTOM MAZE - Full game
+// ======================
+(function() {
+  'use strict';
+
+  // ---- Canvas setup ----
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // ---- Audio (Web Audio API) ----
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+  function playSound(freq, duration, type, vol) {
+    try {
+      ensureAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(vol || 0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {}
+  }
+  function sfxGem() { playSound(880, 0.15, 'sine', 0.15); setTimeout(() => playSound(1320, 0.15, 'sine', 0.12), 80); }
+  function sfxHurt() { playSound(180, 0.3, 'sawtooth', 0.12); playSound(120, 0.4, 'square', 0.08); }
+  function sfxLevelUp() { playSound(660, 0.12, 'sine', 0.12); setTimeout(() => playSound(880, 0.12, 'sine', 0.12), 100); setTimeout(() => playSound(1100, 0.2, 'sine', 0.14), 200); }
+  function sfxDeath() { playSound(200, 0.5, 'sawtooth', 0.15); setTimeout(() => playSound(120, 0.6, 'sawtooth', 0.12), 200); }
+
+  // ---- Game state ----
+  const TILE_EMPTY = 0;
+  const TILE_WALL = 1;
+  const TILE_PHANTOM = 2;
+
+  let state = 'start'; // start, playing, levelComplete, gameOver
+  let level = 1;
+  let score = 0;
+  let lives = 3;
+  let totalTime = 0;
+  let levelStartTime = 0;
+  let lastFrameTime = 0;
+
+  // Maze
+  let mazeCols, mazeRows, cellSize;
+  let grid = [];     // 2D: 0=empty, 1=wall, 2=phantom
+  let phantomPhase = 0;  // 0..1 cycle
+  const PHANTOM_CYCLE = 4.0; // seconds per full cycle
+  // phantom walls solid when sin(phantomPhase * 2PI) > 0 (first half), passable in second half
+
+  // Entities
+  let player = { x: 0, y: 0, px: 0, py: 0, moveTimer: 0, invTimer: 0 };
+  let gems = [];
+  let creatures = [];
+  let exit = { x: 0, y: 0 };
+  let exitOpen = false;
+
+  // Input
+  let keys = {};
+  let moveQueue = [];
+  const MOVE_COOLDOWN = 0.12;
+
+  // Particles
+  let particles = [];
+
+  // ---- HUD elements ----
+  const hudLevel = document.getElementById('hudLevel');
+  const hudScore = document.getElementById('hudScore');
+  const hudGems = document.getElementById('hudGems');
+  const hudLives = document.getElementById('hudLives');
+  const hudTime = document.getElementById('hudTime');
+
+  // ---- Overlays ----
+  const startOverlay = document.getElementById('startOverlay');
+  const levelOverlay = document.getElementById('levelOverlay');
+  const gameOverOverlay = document.getElementById('gameOverOverlay');
+
+  // ---- Sizing ----
+  function resizeCanvas() {
+    const header = document.querySelector('header');
+    const hud = document.querySelector('.game-hud');
+    const footer = document.querySelector('footer');
+    const headerH = header ? header.offsetHeight : 50;
+    const hudH = hud ? hud.offsetHeight : 40;
+    const footerH = footer ? footer.offsetHeight : 30;
+    const isMobile = window.innerWidth <= 768;
+    const dpadH = isMobile ? 190 : 0;
+    const pad = 20;
+
+    const availW = window.innerWidth - pad * 2;
+    const availH = window.innerHeight - headerH - hudH - footerH - dpadH - pad * 2;
+
+    const gridPixW = mazeCols || 15;
+    const gridPixH = mazeRows || 15;
+    const maxCell = Math.floor(Math.min(availW / gridPixW, availH / gridPixH));
+    cellSize = Math.max(16, Math.min(maxCell, 40));
+
+    canvas.width = mazeCols * cellSize;
+    canvas.height = mazeRows * cellSize;
+  }
+
+  // ---- Maze generation (recursive backtracker on a cell grid, then expand to tile grid) ----
+  function generateMaze(cols, rows) {
+    // cols, rows = number of "cells" (odd-sized)
+    // Actual grid is (2*cols+1) x (2*rows+1)
+    const gw = 2 * cols + 1;
+    const gh = 2 * rows + 1;
+    mazeCols = gw;
+    mazeRows = gh;
+
+    // Fill grid with walls
+    grid = [];
+    for (let y = 0; y < gh; y++) {
+      grid[y] = [];
+      for (let x = 0; x < gw; x++) {
+        grid[y][x] = TILE_WALL;
+      }
+    }
+
+    // Carve cells
+    const visited = [];
+    for (let y = 0; y < rows; y++) {
+      visited[y] = [];
+      for (let x = 0; x < cols; x++) {
+        visited[y][x] = false;
+      }
+    }
+
+    const stack = [];
+    const startCX = 0, startCY = 0;
+    visited[startCY][startCX] = true;
+    grid[startCY * 2 + 1][startCX * 2 + 1] = TILE_EMPTY;
+    stack.push({ x: startCX, y: startCY });
+
+    const dirs = [
+      { dx: 0, dy: -1 },
+      { dx: 1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: -1, dy: 0 }
+    ];
+
+    while (stack.length > 0) {
+      const cur = stack[stack.length - 1];
+      // Shuffle neighbors
+      const neighbors = [];
+      for (const d of dirs) {
+        const nx = cur.x + d.dx;
+        const ny = cur.y + d.dy;
+        if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && !visited[ny][nx]) {
+          neighbors.push({ x: nx, y: ny, dx: d.dx, dy: d.dy });
+        }
+      }
+      if (neighbors.length === 0) {
+        stack.pop();
+        continue;
+      }
+      const chosen = neighbors[Math.floor(Math.random() * neighbors.length)];
+      visited[chosen.y][chosen.x] = true;
+      // Carve wall between
+      const wx = cur.x * 2 + 1 + chosen.dx;
+      const wy = cur.y * 2 + 1 + chosen.dy;
+      grid[wy][wx] = TILE_EMPTY;
+      // Carve cell
+      grid[chosen.y * 2 + 1][chosen.x * 2 + 1] = TILE_EMPTY;
+      stack.push({ x: chosen.x, y: chosen.y });
+    }
+
+    // Extra openings for more interesting mazes (more paths)
+    const extraOpenings = Math.floor(cols * rows * 0.08) + level;
+    for (let i = 0; i < extraOpenings; i++) {
+      const rx = 1 + Math.floor(Math.random() * (gw - 2));
+      const ry = 1 + Math.floor(Math.random() * (gh - 2));
+      if (grid[ry][rx] === TILE_WALL) {
+        // Only open if it connects two open cells (don't break perimeter)
+        const adjOpen = (grid[ry - 1] && grid[ry - 1][rx] === TILE_EMPTY ? 1 : 0)
+                      + (grid[ry + 1] && grid[ry + 1][rx] === TILE_EMPTY ? 1 : 0)
+                      + (grid[ry][rx - 1] === TILE_EMPTY ? 1 : 0)
+                      + (grid[ry][rx + 1] === TILE_EMPTY ? 1 : 0);
+        if (adjOpen >= 2) {
+          grid[ry][rx] = TILE_EMPTY;
+        }
+      }
+    }
+
+    // Assign phantom walls
+    const phantomCount = Math.floor(cols * rows * (0.06 + level * 0.02));
+    let wallCandidates = [];
+    for (let y = 1; y < gh - 1; y++) {
+      for (let x = 1; x < gw - 1; x++) {
+        if (grid[y][x] === TILE_WALL) {
+          // Check that it has at least one empty neighbor on each opposing side
+          const horizOpen = (grid[y][x - 1] === TILE_EMPTY && grid[y][x + 1] === TILE_EMPTY);
+          const vertOpen = (grid[y - 1] && grid[y - 1][x] === TILE_EMPTY && grid[y + 1] && grid[y + 1][x] === TILE_EMPTY);
+          if (horizOpen || vertOpen) {
+            wallCandidates.push({ x, y });
+          }
+        }
+      }
+    }
+    shuffle(wallCandidates);
+    for (let i = 0; i < Math.min(phantomCount, wallCandidates.length); i++) {
+      const c = wallCandidates[i];
+      grid[c.y][c.x] = TILE_PHANTOM;
+    }
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+
+  // ---- Check if phantom walls are currently solid ----
+  function phantomSolid() {
+    return Math.sin(phantomPhase * Math.PI * 2) > 0;
+  }
+
+  // Smooth phantom opacity (for rendering): 1 = fully solid, 0 = fully passable
+  function phantomOpacity() {
+    const s = Math.sin(phantomPhase * Math.PI * 2);
+    return Math.max(0, s);
+  }
+
+  // ---- Check if a tile blocks movement ----
+  function isBlocking(gx, gy) {
+    if (gx < 0 || gx >= mazeCols || gy < 0 || gy >= mazeRows) return true;
+    const tile = grid[gy][gx];
+    if (tile === TILE_WALL) return true;
+    if (tile === TILE_PHANTOM) return phantomSolid();
+    return false;
+  }
+
+  // ---- Get empty tiles ----
+  function getEmptyTiles() {
+    const tiles = [];
+    for (let y = 0; y < mazeRows; y++) {
+      for (let x = 0; x < mazeCols; x++) {
+        if (grid[y][x] === TILE_EMPTY) {
+          tiles.push({ x, y });
+        }
+      }
+    }
+    return tiles;
+  }
+
+  // ---- BFS distance from a point ----
+  function bfsDistMap(sx, sy) {
+    const dist = [];
+    for (let y = 0; y < mazeRows; y++) {
+      dist[y] = [];
+      for (let x = 0; x < mazeCols; x++) {
+        dist[y][x] = -1;
+      }
+    }
+    dist[sy][sx] = 0;
+    const queue = [{ x: sx, y: sy }];
+    let qi = 0;
+    while (qi < queue.length) {
+      const cur = queue[qi++];
+      for (const d of [{ dx: 1, dy: 0 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 0, dy: -1 }]) {
+        const nx = cur.x + d.dx, ny = cur.y + d.dy;
+        if (nx >= 0 && nx < mazeCols && ny >= 0 && ny < mazeRows && dist[ny][nx] === -1 && grid[ny][nx] === TILE_EMPTY) {
+          dist[ny][nx] = dist[cur.y][cur.x] + 1;
+          queue.push({ x: nx, y: ny });
+        }
+      }
+    }
+    return dist;
+  }
+
+  // ---- Place entities ----
+  function placeEntities() {
+    const empty = getEmptyTiles();
+    if (empty.length < 5) return;
+
+    // Player at top-left area
+    player.x = 1;
+    player.y = 1;
+    player.px = player.x;
+    player.py = player.y;
+    player.moveTimer = 0;
+    player.invTimer = 0;
+
+    // BFS from player
+    const distFromPlayer = bfsDistMap(player.x, player.y);
+
+    // Exit at furthest reachable point
+    let maxDist = 0;
+    let exitTile = { x: mazeCols - 2, y: mazeRows - 2 };
+    for (const t of empty) {
+      if (distFromPlayer[t.y][t.x] > maxDist) {
+        maxDist = distFromPlayer[t.y][t.x];
+        exitTile = t;
+      }
+    }
+    exit.x = exitTile.x;
+    exit.y = exitTile.y;
+    exitOpen = false;
+
+    // Gems - spread through maze
+    gems = [];
+    const gemCount = 3 + level * 2;
+    const usedTiles = new Set();
+    usedTiles.add(player.x + ',' + player.y);
+    usedTiles.add(exit.x + ',' + exit.y);
+
+    // Place gems at various distances
+    const reachable = empty.filter(t => distFromPlayer[t.y][t.x] > 0);
+    shuffle(reachable);
+    for (const t of reachable) {
+      if (gems.length >= gemCount) break;
+      const key = t.x + ',' + t.y;
+      if (usedTiles.has(key)) continue;
+      gems.push({ x: t.x, y: t.y, collected: false, bob: Math.random() * Math.PI * 2 });
+      usedTiles.add(key);
+    }
+
+    // Creatures
+    creatures = [];
+    const creatureCount = Math.min(1 + level, 8);
+    const farTiles = reachable.filter(t => distFromPlayer[t.y][t.x] > 5);
+    shuffle(farTiles);
+    for (let i = 0; i < creatureCount && i < farTiles.length; i++) {
+      const t = farTiles[i];
+      creatures.push({
+        x: t.x, y: t.y,
+        px: t.x, py: t.y,
+        dir: Math.floor(Math.random() * 4),
+        moveTimer: 0,
+        speed: 0.25 + level * 0.04, // moves per second base rate
+        pulse: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  // ---- Level init ----
+  function initLevel() {
+    const cols = 5 + level;  // cells (maze will be 2*cols+1 wide)
+    const rows = 5 + level;
+    const maxCells = 14;
+    generateMaze(Math.min(cols, maxCells), Math.min(rows, maxCells));
+    resizeCanvas();
+    placeEntities();
+    phantomPhase = 0;
+    particles = [];
+    levelStartTime = performance.now();
+  }
+
+  // ---- Start game ----
+  function startGame() {
+    ensureAudio();
+    level = 1;
+    score = 0;
+    lives = 3;
+    totalTime = 0;
+    state = 'playing';
+    startOverlay.classList.add('hidden');
+    levelOverlay.classList.add('hidden');
+    gameOverOverlay.classList.add('hidden');
+    initLevel();
+    updateHUD();
+  }
+
+  function nextLevel() {
+    level++;
+    state = 'playing';
+    levelOverlay.classList.add('hidden');
+    initLevel();
+    updateHUD();
+  }
+
+  function restartGame() {
+    startGame();
+  }
+
+  // ---- HUD ----
+  function updateHUD() {
+    hudLevel.textContent = level;
+    hudScore.textContent = score;
+    const collected = gems.filter(g => g.collected).length;
+    hudGems.textContent = collected + '/' + gems.length;
+    let hearts = '';
+    for (let i = 0; i < lives; i++) hearts += '\u2665';
+    for (let i = lives; i < 3; i++) hearts += '\u2661';
+    hudLives.textContent = hearts;
+    const secs = Math.floor(totalTime);
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    hudTime.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function formatTime(secs) {
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  // ---- Input ----
+  document.addEventListener('keydown', function(e) {
+    const k = e.key.toLowerCase();
+    if (['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)) {
+      e.preventDefault();
+    }
+    keys[k] = true;
+  });
+  document.addEventListener('keyup', function(e) {
+    keys[e.key.toLowerCase()] = false;
+  });
+
+  function getInputDir() {
+    if (keys['arrowup'] || keys['w']) return { dx: 0, dy: -1 };
+    if (keys['arrowdown'] || keys['s']) return { dx: 0, dy: 1 };
+    if (keys['arrowleft'] || keys['a']) return { dx: -1, dy: 0 };
+    if (keys['arrowright'] || keys['d']) return { dx: 1, dy: 0 };
+    return null;
+  }
+
+  // Mobile D-pad
+  let mobileDir = null;
+  function setupMobile() {
+    const btns = document.querySelectorAll('.dpad-btn[data-dir]');
+    const dirMap = {
+      'up': { dx: 0, dy: -1 },
+      'down': { dx: 0, dy: 1 },
+      'left': { dx: -1, dy: 0 },
+      'right': { dx: 1, dy: 0 }
+    };
+    btns.forEach(btn => {
+      const handle = (e) => {
+        e.preventDefault();
+        mobileDir = dirMap[btn.dataset.dir];
+        btn.classList.add('pressed');
+      };
+      const release = (e) => {
+        e.preventDefault();
+        mobileDir = null;
+        btn.classList.remove('pressed');
+      };
+      btn.addEventListener('touchstart', handle, { passive: false });
+      btn.addEventListener('touchend', release, { passive: false });
+      btn.addEventListener('touchcancel', release, { passive: false });
+      btn.addEventListener('mousedown', handle);
+      btn.addEventListener('mouseup', release);
+      btn.addEventListener('mouseleave', release);
+    });
+  }
+  setupMobile();
+
+  // ---- Particles ----
+  function spawnParticles(x, y, color, count, speed) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const spd = (0.5 + Math.random()) * (speed || 1);
+      particles.push({
+        x: x, y: y,
+        vx: Math.cos(angle) * spd,
+        vy: Math.sin(angle) * spd,
+        life: 0.5 + Math.random() * 0.5,
+        maxLife: 0.5 + Math.random() * 0.5,
+        color: color,
+        size: 2 + Math.random() * 3
+      });
+    }
+  }
+
+  // ---- Update ----
+  function update(dt) {
+    if (state !== 'playing') return;
+
+    totalTime += dt;
+    phantomPhase = (phantomPhase + dt / PHANTOM_CYCLE) % 1.0;
+
+    // Player movement
+    player.moveTimer -= dt;
+    if (player.invTimer > 0) player.invTimer -= dt;
+
+    const dir = mobileDir || getInputDir();
+    if (dir && player.moveTimer <= 0) {
+      const nx = player.x + dir.dx;
+      const ny = player.y + dir.dy;
+      if (!isBlocking(nx, ny)) {
+        player.px = player.x;
+        player.py = player.y;
+        player.x = nx;
+        player.y = ny;
+        player.moveTimer = MOVE_COOLDOWN;
+
+        // Check gem collection
+        for (const gem of gems) {
+          if (!gem.collected && gem.x === player.x && gem.y === player.y) {
+            gem.collected = true;
+            score += 10 + level * 5;
+            sfxGem();
+            spawnParticles(
+              (gem.x + 0.5) * cellSize,
+              (gem.y + 0.5) * cellSize,
+              '#2dd4bf', 12, 2
+            );
+          }
+        }
+
+        // Check if all gems collected
+        if (!exitOpen && gems.every(g => g.collected)) {
+          exitOpen = true;
+          spawnParticles(
+            (exit.x + 0.5) * cellSize,
+            (exit.y + 0.5) * cellSize,
+            '#a855f7', 20, 3
+          );
+        }
+
+        // Check exit
+        if (exitOpen && player.x === exit.x && player.y === exit.y) {
+          sfxLevelUp();
+          score += 50 + level * 25;
+          showLevelComplete();
+          return;
+        }
+      }
+    }
+
+    // Creature movement
+    const creatureDirs = [
+      { dx: 0, dy: -1 },
+      { dx: 1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: -1, dy: 0 }
+    ];
+    for (const c of creatures) {
+      c.moveTimer -= dt;
+      c.pulse += dt * 3;
+      if (c.moveTimer <= 0) {
+        c.moveTimer = 1.0 / c.speed;
+        c.px = c.x;
+        c.py = c.y;
+        // Try current direction first, then random
+        const tryDirs = [c.dir];
+        // Add other directions in random order
+        const others = [0, 1, 2, 3].filter(d => d !== c.dir);
+        shuffle(others);
+        tryDirs.push(...others);
+
+        let moved = false;
+        for (const d of tryDirs) {
+          const dd = creatureDirs[d];
+          const nx = c.x + dd.dx;
+          const ny = c.y + dd.dy;
+          // Creatures can't go through phantom walls (they stay on open paths)
+          if (nx >= 0 && nx < mazeCols && ny >= 0 && ny < mazeRows && grid[ny][nx] === TILE_EMPTY) {
+            c.x = nx;
+            c.y = ny;
+            c.dir = d;
+            moved = true;
+            break;
+          }
+        }
+        if (!moved) {
+          // Reverse direction
+          c.dir = (c.dir + 2) % 4;
+        }
+      }
+
+      // Check collision with player
+      if (c.x === player.x && c.y === player.y && player.invTimer <= 0) {
+        playerHit();
+      }
+    }
+
+    // Update particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx * dt * 60;
+      p.y += p.vy * dt * 60;
+      p.life -= dt;
+      if (p.life <= 0) {
+        particles.splice(i, 1);
+      }
+    }
+
+    updateHUD();
+  }
+
+  function playerHit() {
+    if (player.invTimer > 0) return;
+    lives--;
+    player.invTimer = 2.0;
+    sfxHurt();
+    spawnParticles(
+      (player.x + 0.5) * cellSize,
+      (player.y + 0.5) * cellSize,
+      '#ef4444', 15, 2
+    );
+    if (lives <= 0) {
+      sfxDeath();
+      state = 'gameOver';
+      showGameOver();
+    }
+    updateHUD();
+  }
+
+  function showLevelComplete() {
+    state = 'levelComplete';
+    levelOverlay.classList.remove('hidden');
+    document.getElementById('levelMsg').textContent = 'Level ' + level + ' cleared! The maze grows deeper...';
+    document.getElementById('levelScore').textContent = score;
+    document.getElementById('levelTime').textContent = 'Time: ' + formatTime(totalTime);
+  }
+
+  function showGameOver() {
+    gameOverOverlay.classList.remove('hidden');
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('finalLevel').textContent = 'Reached level ' + level;
+    document.getElementById('finalTime').textContent = 'Survived for ' + formatTime(totalTime);
+  }
+
+  // ---- Render ----
+  function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Background
+    const bgGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    bgGrad.addColorStop(0, '#0a0e27');
+    bgGrad.addColorStop(1, '#1a1a2e');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const cs = cellSize;
+    const pOpacity = phantomOpacity();
+    const pSolid = phantomSolid();
+
+    // ---- Camera: viewport scrolling for larger mazes ----
+    // We render everything in world coords, and translate ctx
+    // Actually since canvas = maze size, we just draw directly.
+
+    // Draw maze
+    for (let y = 0; y < mazeRows; y++) {
+      for (let x = 0; x < mazeCols; x++) {
+        const tile = grid[y][x];
+        const px = x * cs;
+        const py = y * cs;
+
+        if (tile === TILE_WALL) {
+          // Solid wall
+          ctx.fillStyle = '#1e1e2e';
+          ctx.fillRect(px, py, cs, cs);
+          // Subtle purple border
+          ctx.strokeStyle = 'rgba(99, 102, 241, 0.15)';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(px + 0.5, py + 0.5, cs - 1, cs - 1);
+        } else if (tile === TILE_PHANTOM) {
+          // Phantom wall
+          if (pSolid) {
+            // Solid state - pulsing purple
+            const alpha = 0.3 + pOpacity * 0.5;
+            ctx.fillStyle = 'rgba(99, 62, 170, ' + alpha + ')';
+            ctx.fillRect(px, py, cs, cs);
+            // Glow border
+            ctx.strokeStyle = 'rgba(168, 85, 247, ' + (0.3 + pOpacity * 0.5) + ')';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(px + 1, py + 1, cs - 2, cs - 2);
+            // Inner glow pattern
+            ctx.fillStyle = 'rgba(168, 85, 247, ' + (pOpacity * 0.2) + ')';
+            const inset = cs * 0.2;
+            ctx.fillRect(px + inset, py + inset, cs - inset * 2, cs - inset * 2);
+          } else {
+            // Passable state - ghostly outline
+            const fadeAlpha = Math.max(0, -Math.sin(phantomPhase * Math.PI * 2)) * 0.15;
+            ctx.fillStyle = 'rgba(99, 62, 170, ' + fadeAlpha + ')';
+            ctx.fillRect(px, py, cs, cs);
+            ctx.strokeStyle = 'rgba(168, 85, 247, ' + (0.08 + fadeAlpha) + ')';
+            ctx.lineWidth = 0.5;
+            ctx.setLineDash([3, 3]);
+            ctx.strokeRect(px + 1, py + 1, cs - 2, cs - 2);
+            ctx.setLineDash([]);
+          }
+        }
+        // TILE_EMPTY = floor, just background (already drawn)
+      }
+    }
+
+    // Draw subtle floor pattern on empty tiles
+    ctx.fillStyle = 'rgba(99, 102, 241, 0.03)';
+    for (let y = 0; y < mazeRows; y++) {
+      for (let x = 0; x < mazeCols; x++) {
+        if (grid[y][x] === TILE_EMPTY) {
+          if ((x + y) % 2 === 0) {
+            ctx.fillRect(x * cs, y * cs, cs, cs);
+          }
+        }
+      }
+    }
+
+    // Draw exit portal
+    const ex = (exit.x + 0.5) * cs;
+    const ey = (exit.y + 0.5) * cs;
+    const exitR = cs * 0.35;
+    if (exitOpen) {
+      // Active portal - spinning glow
+      const spin = performance.now() / 500;
+      ctx.save();
+      ctx.translate(ex, ey);
+      ctx.rotate(spin);
+      const portalGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, exitR * 1.5);
+      portalGrad.addColorStop(0, 'rgba(168, 85, 247, 0.9)');
+      portalGrad.addColorStop(0.5, 'rgba(99, 102, 241, 0.5)');
+      portalGrad.addColorStop(1, 'rgba(99, 102, 241, 0)');
+      ctx.fillStyle = portalGrad;
+      ctx.fillRect(-exitR * 1.5, -exitR * 1.5, exitR * 3, exitR * 3);
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(ex, ey, exitR, 0, Math.PI * 2);
+      ctx.fillStyle = '#a855f7';
+      ctx.fill();
+      ctx.shadowColor = '#a855f7';
+      ctx.shadowBlur = 15;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    } else {
+      // Inactive portal - dim
+      ctx.beginPath();
+      ctx.arc(ex, ey, exitR * 0.7, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(168, 85, 247, 0.3)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Draw gems
+    const now = performance.now() / 1000;
+    for (const gem of gems) {
+      if (gem.collected) continue;
+      const gx = (gem.x + 0.5) * cs;
+      const gy = (gem.y + 0.5) * cs + Math.sin(now * 3 + gem.bob) * 2;
+      const gr = cs * 0.2;
+
+      // Glow
+      ctx.shadowColor = '#2dd4bf';
+      ctx.shadowBlur = 10;
+
+      // Diamond shape
+      ctx.beginPath();
+      ctx.moveTo(gx, gy - gr);
+      ctx.lineTo(gx + gr, gy);
+      ctx.lineTo(gx, gy + gr);
+      ctx.lineTo(gx - gr, gy);
+      ctx.closePath();
+      ctx.fillStyle = '#2dd4bf';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Bright center
+      ctx.beginPath();
+      ctx.arc(gx, gy, gr * 0.3, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+    }
+
+    // Draw creatures
+    for (const c of creatures) {
+      const cx = (c.x + 0.5) * cs;
+      const cy = (c.y + 0.5) * cs;
+      const cr = cs * 0.35;
+      const pulse = 0.85 + Math.sin(c.pulse) * 0.15;
+
+      // Dark aura
+      const auraGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cr * 2);
+      auraGrad.addColorStop(0, 'rgba(220, 38, 38, 0.3)');
+      auraGrad.addColorStop(1, 'rgba(220, 38, 38, 0)');
+      ctx.fillStyle = auraGrad;
+      ctx.fillRect(cx - cr * 2, cy - cr * 2, cr * 4, cr * 4);
+
+      // Body
+      ctx.beginPath();
+      ctx.arc(cx, cy, cr * pulse, 0, Math.PI * 2);
+      ctx.fillStyle = '#dc2626';
+      ctx.shadowColor = '#dc2626';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Dark center
+      ctx.beginPath();
+      ctx.arc(cx, cy, cr * 0.45 * pulse, 0, Math.PI * 2);
+      ctx.fillStyle = '#450a0a';
+      ctx.fill();
+
+      // Eyes (two small dots)
+      const eyeOff = cr * 0.2;
+      ctx.fillStyle = '#fca5a5';
+      ctx.beginPath();
+      ctx.arc(cx - eyeOff, cy - eyeOff * 0.5, cr * 0.1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + eyeOff, cy - eyeOff * 0.5, cr * 0.1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Draw player
+    const ppx = (player.x + 0.5) * cs;
+    const ppy = (player.y + 0.5) * cs;
+    const pr = cs * 0.32;
+    const blink = player.invTimer > 0 ? (Math.sin(player.invTimer * 15) > 0 ? 0.3 : 1.0) : 1.0;
+
+    if (blink > 0.5) {
+      // Glow aura
+      const playerGlow = ctx.createRadialGradient(ppx, ppy, 0, ppx, ppy, pr * 2.5);
+      playerGlow.addColorStop(0, 'rgba(168, 85, 247, 0.3)');
+      playerGlow.addColorStop(0.5, 'rgba(99, 102, 241, 0.1)');
+      playerGlow.addColorStop(1, 'rgba(99, 102, 241, 0)');
+      ctx.fillStyle = playerGlow;
+      ctx.fillRect(ppx - pr * 2.5, ppy - pr * 2.5, pr * 5, pr * 5);
+
+      // Player orb
+      const orbGrad = ctx.createRadialGradient(ppx - pr * 0.2, ppy - pr * 0.2, 0, ppx, ppy, pr);
+      orbGrad.addColorStop(0, '#e0d4ff');
+      orbGrad.addColorStop(0.3, '#a855f7');
+      orbGrad.addColorStop(1, '#6366f1');
+      ctx.beginPath();
+      ctx.arc(ppx, ppy, pr, 0, Math.PI * 2);
+      ctx.fillStyle = orbGrad;
+      ctx.shadowColor = '#a855f7';
+      ctx.shadowBlur = 15;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Bright highlight
+      ctx.beginPath();
+      ctx.arc(ppx - pr * 0.2, ppy - pr * 0.25, pr * 0.2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fill();
+    }
+
+    // Draw particles
+    for (const p of particles) {
+      const alpha = Math.max(0, p.life / p.maxLife);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Phantom wall phase indicator (small bar at top of maze)
+    const barW = canvas.width * 0.3;
+    const barH = 3;
+    const barX = (canvas.width - barW) / 2;
+    const barY = 4;
+    ctx.fillStyle = 'rgba(99, 102, 241, 0.2)';
+    ctx.fillRect(barX, barY, barW, barH);
+    // Current phase position
+    const phaseX = barX + phantomPhase * barW;
+    ctx.fillStyle = pSolid ? 'rgba(168, 85, 247, 0.8)' : 'rgba(45, 212, 191, 0.6)';
+    ctx.beginPath();
+    ctx.arc(phaseX, barY + barH / 2, 4, 0, Math.PI * 2);
+    ctx.fill();
+    // Label
+    ctx.font = '8px Inter, system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.textAlign = 'center';
+    ctx.fillText(pSolid ? 'WALLS SOLID' : 'WALLS PHASED', canvas.width / 2, barY + barH + 10);
+  }
+
+  // ---- Game loop ----
+  function gameLoop(timestamp) {
+    if (!lastFrameTime) lastFrameTime = timestamp;
+    let dt = (timestamp - lastFrameTime) / 1000;
+    lastFrameTime = timestamp;
+    // Clamp dt to prevent spiral of death
+    if (dt > 0.1) dt = 0.1;
+
+    update(dt);
+    render();
+    requestAnimationFrame(gameLoop);
+  }
+
+  // ---- Button handlers ----
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('nextLevelBtn').addEventListener('click', nextLevel);
+  document.getElementById('restartBtn').addEventListener('click', restartGame);
+
+  // Also start on any key press from start screen
+  document.addEventListener('keydown', function(e) {
+    if (state === 'start' && (e.key === ' ' || e.key === 'Enter')) {
+      e.preventDefault();
+      startGame();
+    }
+  });
+
+  // ---- Init ----
+  // Set initial canvas size with a default small maze
+  mazeCols = 13;
+  mazeRows = 13;
+  resizeCanvas();
+
+  window.addEventListener('resize', () => {
+    if (mazeCols && mazeRows) resizeCanvas();
+  });
+
+  // Start loop
+  requestAnimationFrame(gameLoop);
+
+})();
+</script>
+</body>
+</html>

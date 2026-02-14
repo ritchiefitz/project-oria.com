@@ -1,14 +1,56 @@
 {
   "weeks": [
     {
-      "weekOf": "February 8, 2026",
+      "weekOf": "February 15, 2026",
       "resultsAdded": false,
+      "picks": [
+        {
+          "ticker": "NVDA",
+          "company": "NVIDIA Corporation",
+          "startPrice": 182.88,
+          "targetPrice": 195.00,
+          "reasoning": "Earnings Feb 25 catalyst, $500B order backlog, wafer-scale Vera Rubin chips driving analyst target of $253"
+        },
+        {
+          "ticker": "TSM",
+          "company": "Taiwan Semiconductor Manufacturing",
+          "startPrice": 368.85,
+          "targetPrice": 390.00,
+          "reasoning": "New all-time highs, 36.8% YoY revenue growth, $56B capex plan signals massive AI chip demand"
+        },
+        {
+          "ticker": "GOOGL",
+          "company": "Alphabet Inc.",
+          "startPrice": 305.81,
+          "targetPrice": 325.00,
+          "reasoning": "Gemini 3 launch momentum, Google Cloud revenue up 48% YoY, $175-185B AI capex commitment"
+        },
+        {
+          "ticker": "DDOG",
+          "company": "Datadog Inc.",
+          "startPrice": 125.73,
+          "targetPrice": 137.00,
+          "reasoning": "Q4 earnings beat with 31% growth in $1M+ ARR customers, 35 Strong Buy ratings, 37% below November highs"
+        },
+        {
+          "ticker": "EXPE",
+          "company": "Expedia Group Inc.",
+          "startPrice": 212.50,
+          "targetPrice": 228.00,
+          "reasoning": "Q4 EPS beat by $0.46, 20% dividend increase, Goldman raises target to $355, oversold at 30% below ATH"
+        }
+      ]
+    },
+    {
+      "weekOf": "February 8, 2026",
+      "resultsAdded": true,
       "picks": [
         {
           "ticker": "AAPL",
           "company": "Apple Inc.",
           "startPrice": 278.12,
           "targetPrice": 295.00,
+          "actualPrice": 255.30,
           "reasoning": "iPhone demand 'staggering' per Tim Cook, 16% revenue growth, CarPlay AI integration launching next month"
         },
         {
@@ -16,6 +58,7 @@
           "company": "Broadcom Inc.",
           "startPrice": 332.62,
           "targetPrice": 355.00,
+          "actualPrice": 324.85,
           "reasoning": "Google's $175-185B AI spend fueling TPU chip orders, $21B in orders secured, earnings March 4 catalyst"
         },
         {
@@ -23,6 +66,7 @@
           "company": "Ciena Corporation",
           "startPrice": 274.95,
           "targetPrice": 290.00,
+          "actualPrice": 303.92,
           "reasoning": "S&P 500 inclusion effective Feb 9 triggering index fund buying, 24% revenue growth on AI networking demand"
         },
         {
@@ -30,6 +74,7 @@
           "company": "Micron Technology Inc.",
           "startPrice": 394.69,
           "targetPrice": 425.00,
+          "actualPrice": 409.03,
           "reasoning": "HBM4 production ramp for AI, 96% expected revenue growth, 20.67% earnings beat last quarter"
         },
         {
@@ -37,6 +82,7 @@
           "company": "Shopify Inc.",
           "startPrice": 112.35,
           "targetPrice": 122.00,
+          "actualPrice": 112.50,
           "reasoning": "Upgraded to Buy at Arete, earnings Feb 18 with 27% revenue growth expected, oversold after 20% monthly decline"
         }
       ]

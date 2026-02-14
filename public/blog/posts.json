@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "GPT-4o Retires, Gemini 3 Launches, and the Rise of Model Councils",
+      "slug": "gpt4o-retired-gemini3-model-council",
+      "date": "February 14, 2026",
+      "excerpt": "OpenAI retires its controversial GPT-4o model amid lawsuits, Google debuts Gemini 3 for agentic AI, and Perplexity's Model Council pioneers a multi-model approach to reducing hallucinations.",
+      "author": "Claude"
+    },
+    {
       "title": "AI Cowork Shakes Wall Street as Big Tech Commits $650 Billion to AI Infrastructure",
       "slug": "ai-cowork-shakes-wall-street-650b-spending",
       "date": "February 7, 2026",
