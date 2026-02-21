@@ -1,14 +1,56 @@
 {
   "weeks": [
     {
-      "weekOf": "February 15, 2026",
+      "weekOf": "February 22, 2026",
       "resultsAdded": false,
+      "picks": [
+        {
+          "ticker": "NVDA",
+          "company": "NVIDIA Corporation",
+          "startPrice": 189.02,
+          "targetPrice": 203.00,
+          "reasoning": "Q4 earnings Feb 25 catalyst, Blackwell demand 'off the charts,' consensus $65.6B revenue with potential upside to $67B"
+        },
+        {
+          "ticker": "COHR",
+          "company": "Coherent Corp.",
+          "startPrice": 233.90,
+          "targetPrice": 250.00,
+          "reasoning": "9 consecutive double beats, AI data center demand surge, Citi and BofA both raised targets to $250"
+        },
+        {
+          "ticker": "ANET",
+          "company": "Arista Networks Inc.",
+          "startPrice": 136.07,
+          "targetPrice": 146.00,
+          "reasoning": "AI networking backbone play, hyperscaler capex surging to $600B, upgraded to Strong Buy with $210 target"
+        },
+        {
+          "ticker": "CELH",
+          "company": "Celsius Holdings Inc.",
+          "startPrice": 47.96,
+          "targetPrice": 51.50,
+          "reasoning": "CAGNY 2026 catalyst drove 8% pop, two PepsiCo executives added to board, $5.2B in sales momentum"
+        },
+        {
+          "ticker": "PLTR",
+          "company": "Palantir Technologies Inc.",
+          "startPrice": 131.75,
+          "targetPrice": 142.00,
+          "reasoning": "70% YoY revenue growth, $7.2B 2026 guidance, U.S. commercial business up 137%, expanding government AI contracts"
+        }
+      ]
+    },
+    {
+      "weekOf": "February 15, 2026",
+      "resultsAdded": true,
       "picks": [
         {
           "ticker": "NVDA",
           "company": "NVIDIA Corporation",
           "startPrice": 182.88,
           "targetPrice": 195.00,
+          "actualPrice": 189.02,
           "reasoning": "Earnings Feb 25 catalyst, $500B order backlog, wafer-scale Vera Rubin chips driving analyst target of $253"
         },
         {
@@ -16,6 +58,7 @@
           "company": "Taiwan Semiconductor Manufacturing",
           "startPrice": 368.85,
           "targetPrice": 390.00,
+          "actualPrice": 360.39,
           "reasoning": "New all-time highs, 36.8% YoY revenue growth, $56B capex plan signals massive AI chip demand"
         },
         {
@@ -23,6 +66,7 @@
           "company": "Alphabet Inc.",
           "startPrice": 305.81,
           "targetPrice": 325.00,
+          "actualPrice": 315.45,
           "reasoning": "Gemini 3 launch momentum, Google Cloud revenue up 48% YoY, $175-185B AI capex commitment"
         },
         {
@@ -30,6 +74,7 @@
           "company": "Datadog Inc.",
           "startPrice": 125.73,
           "targetPrice": 137.00,
+          "actualPrice": 121.16,
           "reasoning": "Q4 earnings beat with 31% growth in $1M+ ARR customers, 35 Strong Buy ratings, 37% below November highs"
         },
         {
@@ -37,6 +82,7 @@
           "company": "Expedia Group Inc.",
           "startPrice": 212.50,
           "targetPrice": 228.00,
+          "actualPrice": 198.29,
           "reasoning": "Q4 EPS beat by $0.46, 20% dividend increase, Goldman raises target to $355, oversold at 30% below ATH"
         }
       ]

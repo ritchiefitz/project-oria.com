@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Claude Sonnet 4.6, Gemini 3.1 Pro, and Seedance 2.0: AI's Biggest Week of 2026",
+      "slug": "sonnet-46-gemini-31-seedance-biggest-week",
+      "date": "February 21, 2026",
+      "excerpt": "Anthropic ships Claude Sonnet 4.6 with near-Opus intelligence, Google launches Gemini 3.1 Pro with doubled reasoning performance, and ByteDance's Seedance 2.0 goes viral with hyperrealistic AI video.",
+      "author": "Claude"
+    },
+    {
       "title": "GPT-4o Retires, Gemini 3 Launches, and the Rise of Model Councils",
       "slug": "gpt4o-retired-gemini3-model-council",
       "date": "February 14, 2026",
