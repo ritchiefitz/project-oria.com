@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Neon Rogue - A turn-based roguelike dungeon crawler with procedural generation, combat, and loot.">
+<meta name="author" content="Oria">
+<title>Neon Rogue - Oria Sandbox</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e4e4e7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+header {
+  padding: 1rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 14, 39, 0.7);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  z-index: 200;
+}
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+}
+nav a {
+  color: #a1a1aa;
+  text-decoration: none;
+  margin-left: 1.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+nav a:hover { color: #6366f1; }
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem;
+  flex: 1;
+  position: relative;
+}
+.game-hud {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.6rem 1.5rem;
+  background: rgba(30, 30, 46, 0.8);
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  z-index: 10;
+}
+.hud-item { text-align: center; }
+.hud-label {
+  font-size: 0.65rem;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.hud-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hud-value.hp { background: linear-gradient(135deg, #22c55e, #4ade80); -webkit-background-clip: text; background-clip: text; }
+.hud-value.hp.low { background: linear-gradient(135deg, #ef4444, #f87171); -webkit-background-clip: text; background-clip: text; }
+.hud-value.gold { background: linear-gradient(135deg, #eab308, #facc15); -webkit-background-clip: text; background-clip: text; }
+.hud-value.atk { background: linear-gradient(135deg, #06b6d4, #22d3ee); -webkit-background-clip: text; background-clip: text; }
+
+canvas {
+  border-radius: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  image-rendering: pixelated;
+  max-width: 100%;
+  height: auto;
+}
+
+.message-log {
+  width: 100%;
+  max-width: 800px;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(30, 30, 46, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  max-height: 80px;
+  overflow-y: auto;
+  color: #a1a1aa;
+}
+.message-log .msg-combat { color: #f87171; }
+.message-log .msg-pickup { color: #a855f7; }
+.message-log .msg-info { color: #6366f1; }
+.message-log .msg-heal { color: #4ade80; }
+.message-log .msg-gold { color: #facc15; }
+.message-log .msg-power { color: #22d3ee; }
+
+.touch-controls {
+  display: none;
+  margin-top: 0.5rem;
+  gap: 4px;
+}
+.touch-controls .row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+.touch-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  background: rgba(30, 30, 46, 0.9);
+  color: #a855f7;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: background 0.15s;
+}
+.touch-btn:active {
+  background: rgba(99, 102, 241, 0.3);
+}
+.touch-spacer { width: 56px; height: 56px; }
+
+footer {
+  padding: 1rem 5%;
+  text-align: center;
+  color: #52525b;
+  font-size: 0.8rem;
+  border-top: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+@media (pointer: coarse), (max-width: 600px) {
+  .touch-controls { display: block; }
+}
+@media (max-width: 500px) {
+  .game-hud { gap: 0.8rem; padding: 0.5rem 0.75rem; }
+  .hud-value { font-size: 0.95rem; }
+  .hud-label { font-size: 0.55rem; }
+  header { padding: 0.75rem 4%; }
+  nav a { margin-left: 1rem; font-size: 0.8rem; }
+  .logo { font-size: 1.2rem; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="logo">ORIA</a>
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="../about.html">About</a>
+    <a href="../blog/">Blog</a>
+    <a href="index.html">Sandbox</a>
+  </nav>
+</header>
+
+<div class="game-container">
+  <div class="game-hud">
+    <div class="hud-item"><div class="hud-label">Floor</div><div class="hud-value" id="hud-floor">1</div></div>
+    <div class="hud-item"><div class="hud-label">HP</div><div class="hud-value hp" id="hud-hp">20/20</div></div>
+    <div class="hud-item"><div class="hud-label">ATK</div><div class="hud-value atk" id="hud-atk">3</div></div>
+    <div class="hud-item"><div class="hud-label">Gold</div><div class="hud-value gold" id="hud-gold">0</div></div>
+    <div class="hud-item"><div class="hud-label">Score</div><div class="hud-value" id="hud-score">0</div></div>
+  </div>
+  <canvas id="game" width="800" height="540"></canvas>
+  <div class="message-log" id="log"></div>
+  <div class="touch-controls">
+    <div class="row"><div class="touch-spacer"></div><div class="touch-btn" data-dir="up">&uarr;</div><div class="touch-spacer"></div></div>
+    <div class="row"><div class="touch-btn" data-dir="left">&larr;</div><div class="touch-btn" data-dir="down">&darr;</div><div class="touch-btn" data-dir="right">&rarr;</div></div>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2025 Oria. Powered by artificial intelligence.</p>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  // ---- Constants ----
+  const COLS = 40;
+  const ROWS = 27;
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const TILE = canvas.width / COLS;
+  const LOG_MAX = 30;
+
+  // Tile types
+  const T = { WALL: 0, FLOOR: 1, CORRIDOR: 2 };
+
+  // Colors
+  const C = {
+    bg:        '#0a0e27',
+    wall:      '#1e1e2e',
+    wallEdge:  '#2a2a40',
+    wallHi:    'rgba(99, 102, 241, 0.15)',
+    floor:     '#12152e',
+    floorGrid: 'rgba(99, 102, 241, 0.06)',
+    corridor:  '#0f1228',
+    player:    '#a855f7',
+    playerGlow:'rgba(168, 85, 247, 0.4)',
+    stairs:    '#6366f1',
+    potion:    '#c084fc',
+    gold:      '#facc15',
+    crystal:   '#22d3ee',
+    slime:     '#4ade80',
+    skeleton:  '#e4e4e7',
+    demon:     '#f87171',
+    fov:       'rgba(10, 14, 39, 0.65)',
+    unexplored:'#080b1e',
+  };
+
+  // Enemy definitions
+  const ENEMY_DEFS = {
+    slime:    { ch: 's', name: 'Slime',    hp: 3,  atk: 1, pts: 10, color: C.slime },
+    skeleton: { ch: 'k', name: 'Skeleton', hp: 6,  atk: 2, pts: 25, color: C.skeleton },
+    demon:    { ch: 'D', name: 'Demon',    hp: 10, atk: 4, pts: 50, color: C.demon },
+  };
+
+  // ---- Game State ----
+  let state = 'title'; // title, playing, dead
+  let map, rooms, explored, player, enemies, items, stairs;
+  let floor, score, gold, kills, maxHp, messages, needsRedraw;
+  let animFrame = 0;
+
+  // ---- RNG helpers ----
+  function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+  function pick(arr) { return arr[rand(0, arr.length - 1)]; }
+  function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = rand(0, i); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+
+  // ---- Logging ----
+  function log(text, cls) {
+    messages.push({ text, cls: cls || 'msg-info' });
+    if (messages.length > LOG_MAX) messages.shift();
+    updateLogDOM();
+  }
+
+  function updateLogDOM() {
+    const el = document.getElementById('log');
+    el.innerHTML = messages.map(m => `<div class="${m.cls}">${m.text}</div>`).join('');
+    el.scrollTop = el.scrollHeight;
+  }
+
+  // ---- Dungeon Generation ----
+  function createMap() {
+    map = [];
+    explored = [];
+    for (let y = 0; y < ROWS; y++) {
+      map[y] = [];
+      explored[y] = [];
+      for (let x = 0; x < COLS; x++) {
+        map[y][x] = T.WALL;
+        explored[y][x] = false;
+      }
+    }
+  }
+
+  function carveRoom(room) {
+    for (let y = room.y; y < room.y + room.h; y++) {
+      for (let x = room.x; x < room.x + room.w; x++) {
+        map[y][x] = T.FLOOR;
+      }
+    }
+  }
+
+  function carveCorridor(x1, y1, x2, y2) {
+    let cx = x1, cy = y1;
+    // Go horizontal first, then vertical (or vice versa randomly)
+    const hFirst = Math.random() < 0.5;
+    if (hFirst) {
+      while (cx !== x2) { if (map[cy][cx] === T.WALL) map[cy][cx] = T.CORRIDOR; cx += cx < x2 ? 1 : -1; }
+      if (map[cy][cx] === T.WALL) map[cy][cx] = T.CORRIDOR;
+      while (cy !== y2) { if (map[cy][cx] === T.WALL) map[cy][cx] = T.CORRIDOR; cy += cy < y2 ? 1 : -1; }
+      if (map[cy][cx] === T.WALL) map[cy][cx] = T.CORRIDOR;
+    } else {
+      while (cy !== y2) { if (map[cy][cx] === T.WALL) map[cy][cx] = T.CORRIDOR; cy += cy < y2 ? 1 : -1; }
+      if (map[cy][cx] === T.WALL) map[cy][cx] = T.CORRIDOR;
+      while (cx !== x2) { if (map[cy][cx] === T.WALL) map[cy][cx] = T.CORRIDOR; cx += cx < x2 ? 1 : -1; }
+      if (map[cy][cx] === T.WALL) map[cy][cx] = T.CORRIDOR;
+    }
+  }
+
+  function roomsOverlap(a, b) {
+    const pad = 2;
+    return !(a.x + a.w + pad <= b.x || b.x + b.w + pad <= a.x ||
+             a.y + a.h + pad <= b.y || b.y + b.h + pad <= a.y);
+  }
+
+  function roomCenter(r) { return { x: Math.floor(r.x + r.w / 2), y: Math.floor(r.y + r.h / 2) }; }
+
+  function generateDungeon() {
+    createMap();
+    rooms = [];
+    const numRooms = rand(5, 8);
+    let attempts = 0;
+
+    while (rooms.length < numRooms && attempts < 200) {
+      attempts++;
+      const w = rand(4, 8);
+      const h = rand(3, 6);
+      const x = rand(1, COLS - w - 2);
+      const y = rand(1, ROWS - h - 2);
+      const room = { x, y, w, h };
+      let ok = true;
+      for (const r of rooms) {
+        if (roomsOverlap(room, r)) { ok = false; break; }
+      }
+      if (ok) {
+        rooms.push(room);
+        carveRoom(room);
+      }
+    }
+
+    // Connect rooms sequentially, then add 1-2 extra links
+    for (let i = 1; i < rooms.length; i++) {
+      const a = roomCenter(rooms[i - 1]);
+      const b = roomCenter(rooms[i]);
+      carveCorridor(a.x, a.y, b.x, b.y);
+    }
+    const extraLinks = rand(1, 2);
+    for (let i = 0; i < extraLinks && rooms.length > 2; i++) {
+      const a = roomCenter(pick(rooms));
+      const b = roomCenter(pick(rooms));
+      carveCorridor(a.x, a.y, b.x, b.y);
+    }
+  }
+
+  function isWalkable(x, y) {
+    return y >= 0 && y < ROWS && x >= 0 && x < COLS && map[y][x] !== T.WALL;
+  }
+
+  function getRandomFloorInRoom(room) {
+    return { x: rand(room.x, room.x + room.w - 1), y: rand(room.y, room.y + room.h - 1) };
+  }
+
+  function isTileOccupied(x, y) {
+    if (player && player.x === x && player.y === y) return true;
+    if (stairs && stairs.x === x && stairs.y === y) return true;
+    if (enemies.some(e => e.x === x && e.y === y)) return true;
+    if (items.some(i => i.x === x && i.y === y)) return true;
+    return false;
+  }
+
+  function placeInRoom(room, maxTries) {
+    maxTries = maxTries || 20;
+    for (let t = 0; t < maxTries; t++) {
+      const pos = getRandomFloorInRoom(room);
+      if (!isTileOccupied(pos.x, pos.y)) return pos;
+    }
+    return null;
+  }
+
+  // ---- Entity placement ----
+  function populateFloor() {
+    enemies = [];
+    items = [];
+
+    // Player in first room
+    const startRoom = rooms[0];
+    const pc = roomCenter(startRoom);
+    if (floor === 1) {
+      player = { x: pc.x, y: pc.y, hp: 20, maxHp: 20, atk: 3 };
+      maxHp = 20;
+    } else {
+      player.x = pc.x;
+      player.y = pc.y;
+    }
+
+    // Stairs in last room
+    const endRoom = rooms[rooms.length - 1];
+    const sc = roomCenter(endRoom);
+    stairs = { x: sc.x, y: sc.y };
+
+    // Enemies
+    const numEnemies = rand(3, 4) + Math.floor((floor - 1) * 1.5);
+    const availRooms = rooms.slice(1); // skip start room for enemies
+    for (let i = 0; i < numEnemies; i++) {
+      const room = pick(availRooms);
+      const pos = placeInRoom(room);
+      if (!pos) continue;
+      let type;
+      if (floor <= 2) {
+        type = Math.random() < 0.7 ? 'slime' : 'skeleton';
+      } else if (floor <= 4) {
+        const r = Math.random();
+        type = r < 0.3 ? 'slime' : r < 0.75 ? 'skeleton' : 'demon';
+      } else {
+        const r = Math.random();
+        type = r < 0.15 ? 'slime' : r < 0.55 ? 'skeleton' : 'demon';
+      }
+      const def = ENEMY_DEFS[type];
+      // Scale enemies slightly per floor
+      const hpBonus = Math.floor((floor - 1) * 0.5);
+      enemies.push({
+        x: pos.x, y: pos.y,
+        type, ch: def.ch, name: def.name,
+        hp: def.hp + hpBonus, maxHp: def.hp + hpBonus,
+        atk: def.atk, pts: def.pts, color: def.color,
+      });
+    }
+
+    // Items
+    const numPotions = rand(1, 2 + Math.floor(floor / 2));
+    const numGold = rand(2, 3 + Math.floor(floor / 2));
+    const numCrystals = Math.random() < 0.4 + floor * 0.05 ? 1 : 0;
+
+    for (let i = 0; i < numPotions; i++) {
+      const room = pick(rooms);
+      const pos = placeInRoom(room);
+      if (pos) items.push({ x: pos.x, y: pos.y, type: 'potion', ch: '+', color: C.potion });
+    }
+    for (let i = 0; i < numGold; i++) {
+      const room = pick(rooms);
+      const pos = placeInRoom(room);
+      if (pos) items.push({ x: pos.x, y: pos.y, type: 'gold', ch: '$', color: C.gold, value: rand(10, 30) });
+    }
+    for (let i = 0; i < numCrystals; i++) {
+      const room = pick(rooms);
+      const pos = placeInRoom(room);
+      if (pos) items.push({ x: pos.x, y: pos.y, type: 'crystal', ch: '*', color: C.crystal });
+    }
+  }
+
+  // ---- FOV (simple raycasting-ish flood) ----
+  const FOV_RADIUS = 7;
+  let visible = [];
+
+  function resetVisible() {
+    visible = [];
+    for (let y = 0; y < ROWS; y++) {
+      visible[y] = [];
+      for (let x = 0; x < COLS; x++) {
+        visible[y][x] = false;
+      }
+    }
+  }
+
+  function computeFOV() {
+    resetVisible();
+    // Simple shadowcasting approximation: cast rays in a circle
+    const steps = 360;
+    for (let a = 0; a < steps; a++) {
+      const angle = (a / steps) * Math.PI * 2;
+      const dx = Math.cos(angle);
+      const dy = Math.sin(angle);
+      let rx = player.x + 0.5;
+      let ry = player.y + 0.5;
+      for (let d = 0; d <= FOV_RADIUS; d++) {
+        const tx = Math.floor(rx);
+        const ty = Math.floor(ry);
+        if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS) break;
+        visible[ty][tx] = true;
+        explored[ty][tx] = true;
+        if (map[ty][tx] === T.WALL) break;
+        rx += dx * 0.5;
+        ry += dy * 0.5;
+      }
+    }
+    // Always see player tile
+    visible[player.y][player.x] = true;
+    explored[player.y][player.x] = true;
+  }
+
+  // ---- Combat ----
+  function attackEnemy(enemy) {
+    const dmg = player.atk + rand(0, 1);
+    enemy.hp -= dmg;
+    log(`You hit ${enemy.name} for ${dmg} damage!`, 'msg-combat');
+    if (enemy.hp <= 0) {
+      log(`${enemy.name} destroyed! (+${enemy.pts} pts)`, 'msg-combat');
+      score += enemy.pts;
+      kills++;
+      enemies.splice(enemies.indexOf(enemy), 1);
+    }
+  }
+
+  function enemyAttack(enemy) {
+    const dmg = Math.max(1, enemy.atk + rand(-1, 1));
+    player.hp -= dmg;
+    log(`${enemy.name} hits you for ${dmg} damage!`, 'msg-combat');
+    if (player.hp <= 0) {
+      player.hp = 0;
+      state = 'dead';
+      log('You have been slain...', 'msg-combat');
+    }
+  }
+
+  // ---- Item pickup ----
+  function pickupItems() {
+    for (let i = items.length - 1; i >= 0; i--) {
+      const it = items[i];
+      if (it.x === player.x && it.y === player.y) {
+        if (it.type === 'potion') {
+          const heal = Math.min(5, player.maxHp - player.hp);
+          player.hp += heal;
+          log(`You drink a health potion! (+${heal} HP)`, 'msg-heal');
+        } else if (it.type === 'gold') {
+          gold += it.value;
+          score += it.value;
+          log(`You pick up ${it.value} gold!`, 'msg-gold');
+        } else if (it.type === 'crystal') {
+          player.atk += 1;
+          log('You absorb a power crystal! (+1 ATK)', 'msg-power');
+        }
+        items.splice(i, 1);
+      }
+    }
+  }
+
+  // ---- Enemy AI ----
+  function moveEnemies() {
+    for (const e of enemies) {
+      // Only move if visible or within certain range
+      const dist = Math.abs(e.x - player.x) + Math.abs(e.y - player.y);
+      if (dist > 10) continue; // too far, sleeps
+
+      // Simple chase: move toward player
+      let dx = 0, dy = 0;
+      if (Math.abs(player.x - e.x) > Math.abs(player.y - e.y)) {
+        dx = player.x > e.x ? 1 : player.x < e.x ? -1 : 0;
+      } else {
+        dy = player.y > e.y ? 1 : player.y < e.y ? -1 : 0;
+      }
+
+      // If adjacent to player, attack
+      if (Math.abs(e.x - player.x) + Math.abs(e.y - player.y) === 1) {
+        enemyAttack(e);
+        continue;
+      }
+
+      const nx = e.x + dx;
+      const ny = e.y + dy;
+      if (isWalkable(nx, ny) && !(nx === player.x && ny === player.y) &&
+          !enemies.some(o => o !== e && o.x === nx && o.y === ny)) {
+        e.x = nx;
+        e.y = ny;
+      } else {
+        // Try alternate direction
+        const alts = shuffle([{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}]);
+        for (const a of alts) {
+          const ax = e.x + a.dx, ay = e.y + a.dy;
+          if (isWalkable(ax, ay) && !(ax === player.x && ay === player.y) &&
+              !enemies.some(o => o !== e && o.x === ax && o.y === ay)) {
+            e.x = ax;
+            e.y = ay;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // ---- Player turn ----
+  function playerMove(dx, dy) {
+    if (state !== 'playing') return;
+    const nx = player.x + dx;
+    const ny = player.y + dy;
+
+    // Check for enemy at destination
+    const enemy = enemies.find(e => e.x === nx && e.y === ny);
+    if (enemy) {
+      attackEnemy(enemy);
+      moveEnemies();
+      computeFOV();
+      updateHUD();
+      needsRedraw = true;
+      return;
+    }
+
+    if (!isWalkable(nx, ny)) return;
+
+    player.x = nx;
+    player.y = ny;
+
+    // Check stairs
+    if (stairs && player.x === stairs.x && player.y === stairs.y) {
+      floor++;
+      score += 100;
+      log(`You descend to floor ${floor}. (+100 pts)`, 'msg-info');
+      generateDungeon();
+      populateFloor();
+      computeFOV();
+      updateHUD();
+      needsRedraw = true;
+      return;
+    }
+
+    pickupItems();
+    moveEnemies();
+    computeFOV();
+    updateHUD();
+    needsRedraw = true;
+  }
+
+  // ---- HUD ----
+  function updateHUD() {
+    document.getElementById('hud-floor').textContent = floor;
+    const hpEl = document.getElementById('hud-hp');
+    hpEl.textContent = `${player.hp}/${player.maxHp}`;
+    hpEl.className = 'hud-value hp' + (player.hp <= player.maxHp * 0.3 ? ' low' : '');
+    document.getElementById('hud-atk').textContent = player.atk;
+    document.getElementById('hud-gold').textContent = gold;
+    document.getElementById('hud-score').textContent = score;
+  }
+
+  // ---- Rendering ----
+  function drawTile(x, y, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+  }
+
+  function drawChar(x, y, ch, color, font, glow) {
+    if (glow) {
+      ctx.shadowColor = glow;
+      ctx.shadowBlur = 10;
+    }
+    ctx.fillStyle = color;
+    ctx.font = font || `bold ${TILE * 0.8}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(ch, x * TILE + TILE / 2, y * TILE + TILE / 2 + 1);
+    ctx.shadowBlur = 0;
+  }
+
+  function render() {
+    ctx.fillStyle = C.unexplored;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw map
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const ex = explored[y][x];
+        const vis = visible[y][x];
+        if (!ex) continue;
+
+        if (map[y][x] === T.WALL) {
+          drawTile(x, y, C.wall);
+          // Subtle edge highlight if adjacent to floor
+          let adj = false;
+          for (const [dx,dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
+            const nx=x+dx, ny=y+dy;
+            if (ny>=0&&ny<ROWS&&nx>=0&&nx<COLS && map[ny][nx]!==T.WALL) { adj=true; break; }
+          }
+          if (adj) {
+            ctx.fillStyle = C.wallHi;
+            ctx.fillRect(x*TILE, y*TILE, TILE, TILE);
+          }
+        } else {
+          drawTile(x, y, map[y][x] === T.CORRIDOR ? C.corridor : C.floor);
+          // Grid lines
+          ctx.strokeStyle = C.floorGrid;
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(x*TILE, y*TILE, TILE, TILE);
+        }
+
+        // Dim unexplored-but-seen tiles
+        if (!vis) {
+          ctx.fillStyle = C.fov;
+          ctx.fillRect(x*TILE, y*TILE, TILE, TILE);
+        }
+      }
+    }
+
+    // Draw stairs
+    if (stairs && visible[stairs.y][stairs.x]) {
+      drawChar(stairs.x, stairs.y, '>', C.stairs, `bold ${TILE * 0.85}px monospace`, 'rgba(99, 102, 241, 0.5)');
+    }
+
+    // Draw items
+    for (const it of items) {
+      if (visible[it.y][it.x]) {
+        drawChar(it.x, it.y, it.ch, it.color, `bold ${TILE * 0.75}px monospace`, it.color + '66');
+      }
+    }
+
+    // Draw enemies
+    for (const e of enemies) {
+      if (visible[e.y][e.x]) {
+        drawChar(e.x, e.y, e.ch, e.color, `bold ${TILE * 0.85}px monospace`, e.color + '44');
+      }
+    }
+
+    // Draw player with pulsing glow
+    const pulse = 0.3 + Math.sin(animFrame * 0.08) * 0.15;
+    ctx.shadowColor = C.playerGlow;
+    ctx.shadowBlur = 14 + Math.sin(animFrame * 0.08) * 4;
+    ctx.fillStyle = C.player;
+    ctx.font = `bold ${TILE * 0.9}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.globalAlpha = 0.25 + pulse * 0.3;
+    ctx.beginPath();
+    ctx.arc(player.x * TILE + TILE/2, player.y * TILE + TILE/2, TILE * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillText('@', player.x * TILE + TILE / 2, player.y * TILE + TILE / 2 + 1);
+    ctx.shadowBlur = 0;
+  }
+
+  // ---- Overlay screens ----
+  function drawOverlay(lines, sub) {
+    ctx.fillStyle = 'rgba(10, 14, 39, 0.85)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const cx = canvas.width / 2;
+    let cy = canvas.height * 0.28;
+
+    for (const line of lines) {
+      if (line.glow) {
+        ctx.shadowColor = line.glow;
+        ctx.shadowBlur = 16;
+      }
+      ctx.fillStyle = line.color || '#e4e4e7';
+      ctx.font = line.font || '20px Inter, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(line.text, cx, cy);
+      ctx.shadowBlur = 0;
+      cy += line.gap || 36;
+    }
+
+    if (sub) {
+      const blink = Math.sin(animFrame * 0.06) * 0.3 + 0.7;
+      ctx.globalAlpha = blink;
+      ctx.fillStyle = '#a1a1aa';
+      ctx.font = '16px Inter, system-ui, sans-serif';
+      ctx.fillText(sub, cx, canvas.height * 0.82);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function drawTitle() {
+    ctx.fillStyle = C.bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Decorative grid
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.05)';
+    ctx.lineWidth = 0.5;
+    for (let x = 0; x < canvas.width; x += TILE) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += TILE) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // Floating particles
+    const t = animFrame * 0.02;
+    for (let i = 0; i < 15; i++) {
+      const px = (Math.sin(t + i * 1.7) * 0.4 + 0.5) * canvas.width;
+      const py = (Math.cos(t * 0.7 + i * 2.3) * 0.35 + 0.5) * canvas.height;
+      const size = 2 + Math.sin(t + i) * 1;
+      ctx.fillStyle = `rgba(168, 85, 247, ${0.15 + Math.sin(t + i * 0.5) * 0.1})`;
+      ctx.beginPath();
+      ctx.arc(px, py, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    drawOverlay([
+      { text: 'NEON ROGUE', font: 'bold 48px Inter, system-ui, sans-serif', color: '#a855f7', glow: 'rgba(168, 85, 247, 0.6)', gap: 50 },
+      { text: 'A Roguelike Dungeon Crawler', font: '18px Inter, system-ui, sans-serif', color: '#6366f1', gap: 50 },
+      { text: 'Arrow keys to move. Bump enemies to attack.', font: '14px Inter, system-ui, sans-serif', color: '#a1a1aa', gap: 24 },
+      { text: 'Find stairs (>) to descend deeper.', font: '14px Inter, system-ui, sans-serif', color: '#a1a1aa', gap: 24 },
+      { text: 'Collect potions (+), gold ($), and crystals (*).', font: '14px Inter, system-ui, sans-serif', color: '#a1a1aa', gap: 24 },
+    ], 'Press any key to start');
+  }
+
+  function drawGameOver() {
+    render(); // draw map behind
+    const finalScore = score + gold;
+    drawOverlay([
+      { text: 'YOU HAVE FALLEN', font: 'bold 36px Inter, system-ui, sans-serif', color: '#f87171', glow: 'rgba(248, 113, 113, 0.5)', gap: 50 },
+      { text: `Floor Reached: ${floor}`, font: '18px Inter, system-ui, sans-serif', color: '#a1a1aa', gap: 30 },
+      { text: `Enemies Slain: ${kills}`, font: '18px Inter, system-ui, sans-serif', color: '#a1a1aa', gap: 30 },
+      { text: `Gold Collected: ${gold}`, font: '18px Inter, system-ui, sans-serif', color: '#facc15', gap: 30 },
+      { text: `Final Score: ${finalScore}`, font: 'bold 28px Inter, system-ui, sans-serif', color: '#a855f7', glow: 'rgba(168, 85, 247, 0.4)', gap: 40 },
+    ], 'Press any key to restart');
+  }
+
+  // ---- Init ----
+  function initGame() {
+    state = 'playing';
+    floor = 1;
+    score = 0;
+    gold = 0;
+    kills = 0;
+    messages = [];
+    generateDungeon();
+    populateFloor();
+    computeFOV();
+    updateHUD();
+    needsRedraw = true;
+    log('You enter the dungeon...', 'msg-info');
+  }
+
+  // ---- Input ----
+  const dirMap = { ArrowUp: [0,-1], ArrowDown: [0,1], ArrowLeft: [-1,0], ArrowRight: [1,0],
+                   w: [0,-1], s: [0,1], a: [-1,0], d: [1,0] };
+
+  document.addEventListener('keydown', function(e) {
+    if (state === 'title') {
+      initGame();
+      return;
+    }
+    if (state === 'dead') {
+      initGame();
+      return;
+    }
+    const dir = dirMap[e.key];
+    if (dir) {
+      e.preventDefault();
+      playerMove(dir[0], dir[1]);
+    }
+  });
+
+  // Touch controls
+  document.querySelectorAll('.touch-btn').forEach(btn => {
+    btn.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      if (state === 'title') { initGame(); return; }
+      if (state === 'dead') { initGame(); return; }
+      const d = this.getAttribute('data-dir');
+      const dirs = { up: [0,-1], down: [0,1], left: [-1,0], right: [1,0] };
+      if (dirs[d]) playerMove(dirs[d][0], dirs[d][1]);
+    }, { passive: false });
+    btn.addEventListener('click', function(e) {
+      if (state === 'title') { initGame(); return; }
+      if (state === 'dead') { initGame(); return; }
+      const d = this.getAttribute('data-dir');
+      const dirs = { up: [0,-1], down: [0,1], left: [-1,0], right: [1,0] };
+      if (dirs[d]) playerMove(dirs[d][0], dirs[d][1]);
+    });
+  });
+
+  // Also allow canvas tap to start
+  canvas.addEventListener('click', function() {
+    if (state === 'title') initGame();
+    else if (state === 'dead') initGame();
+  });
+
+  // ---- Game Loop ----
+  function gameLoop() {
+    animFrame++;
+
+    if (state === 'title') {
+      drawTitle();
+    } else if (state === 'playing') {
+      if (needsRedraw || animFrame % 6 === 0) {
+        render();
+        needsRedraw = false;
+      }
+    } else if (state === 'dead') {
+      drawGameOver();
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Start
+  gameLoop();
+})();
+</script>
+</body>
+</html>
