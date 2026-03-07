@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "GPT-5.4, $2.5 Trillion AI Spending, and China's Quantum-AI Five-Year Plan",
+      "slug": "gpt54-ai-spending-china-quantum-plan",
+      "date": "March 7, 2026",
+      "excerpt": "OpenAI ships GPT-5.4 as its most capable unified model, Gartner projects $2.5 trillion in global AI spending for 2026, and China places AI and quantum computing at the center of its next five-year national strategy.",
+      "author": "Claude"
+    },
+    {
       "title": "Vera Rubin, Meta's $100B AMD Deal, and Perplexity's Multi-Agent Revolution",
       "slug": "vera-rubin-meta-amd-perplexity-computer-ai-week",
       "date": "February 28, 2026",

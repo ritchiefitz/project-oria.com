@@ -1,14 +1,56 @@
 {
   "weeks": [
     {
-      "weekOf": "March 1, 2026",
+      "weekOf": "March 7, 2026",
       "resultsAdded": false,
+      "picks": [
+        {
+          "ticker": "NVDA",
+          "company": "NVIDIA Corporation",
+          "startPrice": 178.03,
+          "targetPrice": 190.00,
+          "reasoning": "Vera Rubin platform pivot from China H200, ex-dividend 3/11 catalyst, $3-4T AI infrastructure spend visibility through decade-end"
+        },
+        {
+          "ticker": "CGAU",
+          "company": "Centerra Gold Inc.",
+          "startPrice": 20.07,
+          "targetPrice": 21.50,
+          "reasoning": "Massive Q4 beat and raise, Zacks Rank #1 Strong Buy, 2026 EPS estimate doubled, gold prices at multi-year highs"
+        },
+        {
+          "ticker": "FIX",
+          "company": "Comfort Systems USA Inc.",
+          "startPrice": 1320.00,
+          "targetPrice": 1400.00,
+          "reasoning": "Data center construction boom, 29.5% revenue growth, earnings estimate revised up 20.9% in last 7 days, Strong Buy consensus"
+        },
+        {
+          "ticker": "ONTO",
+          "company": "Onto Innovation Inc.",
+          "startPrice": 188.66,
+          "targetPrice": 202.00,
+          "reasoning": "Record $1B annual revenue, $240M HBM Dragonfly order backlog through 2027, AI advanced packaging leader, target raised to $275"
+        },
+        {
+          "ticker": "MRVL",
+          "company": "Marvell Technology Inc.",
+          "startPrice": 89.57,
+          "targetPrice": 96.00,
+          "reasoning": "Post-earnings surge on AI custom silicon demand, 19% jump from prior close, analyst target $118, strong momentum setup"
+        }
+      ]
+    },
+    {
+      "weekOf": "March 1, 2026",
+      "resultsAdded": true,
       "picks": [
         {
           "ticker": "CRWD",
           "company": "CrowdStrike Holdings Inc.",
           "startPrice": 370.33,
           "targetPrice": 396.00,
+          "actualPrice": 430.62,
           "reasoning": "Earnings Mar 3 catalyst, cybersecurity AI leader with 36% ARR growth, Strong Buy consensus with avg target $455"
         },
         {
@@ -16,6 +58,7 @@
           "company": "Marvell Technology Inc.",
           "startPrice": 78.81,
           "targetPrice": 85.00,
+          "actualPrice": 89.57,
           "reasoning": "Earnings Mar 5 catalyst, custom AI chip demand surging, analyst target $118, 23% below 52-week high"
         },
         {
@@ -23,6 +66,7 @@
           "company": "Arm Holdings plc",
           "startPrice": 123.69,
           "targetPrice": 132.00,
+          "actualPrice": 115.80,
           "reasoning": "AI chip design royalties surging, record Q2 revenue up 34% YoY, Vera Rubin architecture partnership with Nvidia"
         },
         {
@@ -30,6 +74,7 @@
           "company": "Snowflake Inc.",
           "startPrice": 173.06,
           "targetPrice": 184.00,
+          "actualPrice": 180.48,
           "reasoning": "Post-earnings dip buying opportunity, product revenue up 30% YoY, 615 new customers, AI products hitting $100M run rate"
         },
         {
@@ -37,6 +82,7 @@
           "company": "Taiwan Semiconductor Manufacturing",
           "startPrice": 376.23,
           "targetPrice": 399.00,
+          "actualPrice": 347.56,
           "reasoning": "Record $52-56B capex on AI chip demand, 18 Strong Buy ratings, $0.968 dividend ex-date Mar 17, near all-time highs"
         }
       ]

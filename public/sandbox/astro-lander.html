@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astro Lander - Oria Sandbox</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e4e4e7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+header {
+  width: 100%;
+  padding: 1rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 14, 39, 0.7);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+}
+nav a {
+  color: #a1a1aa;
+  text-decoration: none;
+  margin-left: 1.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+nav a:hover { color: #6366f1; }
+.game-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  width: 100%;
+  max-width: 800px;
+}
+.hud {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #a1a1aa;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.hud span { font-weight: 600; }
+.hud .val { color: #6366f1; }
+.hud .warn { color: #ef4444; }
+.hud .good { color: #22c55e; }
+canvas {
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 8px;
+  background: #050816;
+  max-width: 100%;
+}
+.controls-info {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: #71717a;
+  text-align: center;
+}
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 10;
+  pointer-events: none;
+}
+.overlay h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.overlay p {
+  color: #a1a1aa;
+  margin-bottom: 0.25rem;
+}
+.overlay .start-msg {
+  color: #6366f1;
+  font-weight: 600;
+  margin-top: 1rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="logo">ORIA</a>
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="index.html">Sandbox</a>
+  </nav>
+</header>
+
+<div class="game-container">
+  <div class="hud">
+    <div>Score: <span class="val" id="score">0</span></div>
+    <div>Level: <span class="val" id="level">1</span></div>
+    <div>Fuel: <span id="fuel" class="val">100%</span></div>
+    <div>Vx: <span id="vx" class="val">0.0</span></div>
+    <div>Vy: <span id="vy" class="val">0.0</span></div>
+  </div>
+  <canvas id="game" width="760" height="500"></canvas>
+  <div class="controls-info">Arrow keys / WASD to thrust &bull; Land gently on the green pads &bull; Press R to restart</div>
+</div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+const W = canvas.width;
+const H = canvas.height;
+
+const GRAVITY = 0.03;
+const THRUST = 0.08;
+const SIDE_THRUST = 0.06;
+const MAX_SAFE_VY = 1.8;
+const MAX_SAFE_VX = 1.2;
+const FUEL_USE = 0.15;
+const STAR_COUNT = 120;
+
+let ship, pads, terrain, stars, particles;
+let score = 0, level = 1, fuel, gameState;
+let keys = {};
+
+const $score = document.getElementById('score');
+const $level = document.getElementById('level');
+const $fuel = document.getElementById('fuel');
+const $vx = document.getElementById('vx');
+const $vy = document.getElementById('vy');
+
+function initStars() {
+  stars = [];
+  for (let i = 0; i < STAR_COUNT; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H * 0.7,
+      r: Math.random() * 1.5 + 0.3,
+      a: Math.random() * 0.5 + 0.3,
+      twinkleSpeed: Math.random() * 0.02 + 0.005
+    });
+  }
+}
+
+function generateTerrain() {
+  terrain = [];
+  pads = [];
+  const segments = 30 + level * 5;
+  const segW = W / segments;
+  const baseH = H * 0.7;
+  const roughness = 20 + level * 8;
+
+  // Generate random heights
+  let heights = [];
+  for (let i = 0; i <= segments; i++) {
+    heights.push(baseH + (Math.random() - 0.5) * roughness * 2);
+  }
+
+  // Place 2-3 landing pads
+  const padCount = Math.max(2, 3 - Math.floor(level / 4));
+  const padWidth = Math.max(2, 4 - Math.floor(level / 3));
+  let padPositions = [];
+
+  for (let p = 0; p < padCount; p++) {
+    let pos;
+    let attempts = 0;
+    do {
+      pos = Math.floor(Math.random() * (segments - padWidth - 4)) + 2;
+      attempts++;
+    } while (attempts < 50 && padPositions.some(pp => Math.abs(pp - pos) < padWidth + 3));
+    padPositions.push(pos);
+
+    const padY = baseH + (Math.random() - 0.3) * roughness;
+    for (let i = pos; i <= pos + padWidth; i++) {
+      heights[i] = padY;
+    }
+    pads.push({
+      x: pos * segW,
+      w: padWidth * segW,
+      y: padY,
+      bonus: (padCount - p) * 50 + level * 25
+    });
+  }
+
+  for (let i = 0; i <= segments; i++) {
+    terrain.push({ x: i * segW, y: heights[i] });
+  }
+}
+
+function initShip() {
+  ship = {
+    x: W * 0.2 + Math.random() * W * 0.6,
+    y: 60,
+    vx: (Math.random() - 0.5) * 1.5,
+    vy: 0,
+    w: 20,
+    h: 24,
+    thrustMain: false,
+    thrustLeft: false,
+    thrustRight: false
+  };
+  fuel = 100;
+  particles = [];
+}
+
+function initLevel() {
+  generateTerrain();
+  initShip();
+  gameState = 'playing';
+}
+
+function init() {
+  score = 0;
+  level = 1;
+  initStars();
+  initLevel();
+}
+
+function addParticle(x, y, vx, vy, color, life) {
+  particles.push({ x, y, vx, vy, color, life, maxLife: life });
+}
+
+function emitThrust(ox, oy, dvx, dvy, color) {
+  for (let i = 0; i < 2; i++) {
+    addParticle(
+      ship.x + ox + (Math.random() - 0.5) * 4,
+      ship.y + oy + (Math.random() - 0.5) * 4,
+      dvx + (Math.random() - 0.5) * 1.5,
+      dvy + (Math.random() - 0.5) * 1.5,
+      color, 15 + Math.random() * 10
+    );
+  }
+}
+
+function emitExplosion(x, y) {
+  for (let i = 0; i < 40; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 4 + 1;
+    const colors = ['#ef4444', '#f97316', '#eab308', '#6366f1'];
+    addParticle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed,
+      colors[Math.floor(Math.random() * colors.length)], 30 + Math.random() * 20);
+  }
+}
+
+function emitLandingCelebration(x, y) {
+  for (let i = 0; i < 25; i++) {
+    const angle = -Math.PI * Math.random();
+    const speed = Math.random() * 3 + 1;
+    const colors = ['#22c55e', '#6366f1', '#a855f7', '#eab308'];
+    addParticle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed,
+      colors[Math.floor(Math.random() * colors.length)], 40 + Math.random() * 20);
+  }
+}
+
+function getTerrainY(px) {
+  for (let i = 0; i < terrain.length - 1; i++) {
+    if (px >= terrain[i].x && px <= terrain[i + 1].x) {
+      const t = (px - terrain[i].x) / (terrain[i + 1].x - terrain[i].x);
+      return terrain[i].y + t * (terrain[i + 1].y - terrain[i].y);
+    }
+  }
+  return H;
+}
+
+function checkLanding() {
+  const shipBottom = ship.y + ship.h / 2;
+  const shipLeft = ship.x - ship.w / 2;
+  const shipRight = ship.x + ship.w / 2;
+
+  // Check pad landing
+  for (const pad of pads) {
+    if (shipLeft >= pad.x - 2 && shipRight <= pad.x + pad.w + 2 && Math.abs(shipBottom - pad.y) < 4) {
+      if (Math.abs(ship.vy) <= MAX_SAFE_VY && Math.abs(ship.vx) <= MAX_SAFE_VX) {
+        // Successful landing
+        const speedBonus = Math.floor((1 - Math.abs(ship.vy) / MAX_SAFE_VY) * 30);
+        const fuelBonus = Math.floor(fuel * 0.5);
+        const gained = pad.bonus + speedBonus + fuelBonus;
+        score += gained;
+        gameState = 'landed';
+        ship.vy = 0;
+        ship.vx = 0;
+        ship.y = pad.y - ship.h / 2;
+        emitLandingCelebration(ship.x, ship.y + ship.h / 2);
+        setTimeout(() => {
+          level++;
+          initLevel();
+        }, 2000);
+        return true;
+      } else {
+        // Crashed on pad (too fast)
+        gameState = 'crashed';
+        emitExplosion(ship.x, ship.y);
+        return true;
+      }
+    }
+  }
+
+  // Check terrain collision
+  const terrainY = getTerrainY(ship.x);
+  if (shipBottom >= terrainY) {
+    gameState = 'crashed';
+    emitExplosion(ship.x, ship.y);
+    return true;
+  }
+
+  // Out of bounds
+  if (ship.x < 0 || ship.x > W || ship.y < -50) {
+    gameState = 'crashed';
+    emitExplosion(Math.max(0, Math.min(W, ship.x)), Math.max(0, Math.min(H, ship.y)));
+    return true;
+  }
+
+  return false;
+}
+
+function update() {
+  if (gameState !== 'playing') return;
+
+  // Apply gravity
+  ship.vy += GRAVITY;
+
+  // Apply thrust
+  if (keys['ArrowUp'] || keys['KeyW'] || keys['Space']) {
+    if (fuel > 0) {
+      ship.vy -= THRUST;
+      fuel = Math.max(0, fuel - FUEL_USE);
+      ship.thrustMain = true;
+      emitThrust(0, ship.h / 2 + 3, (Math.random() - 0.5) * 0.5, 2 + Math.random(), '#f97316');
+    } else {
+      ship.thrustMain = false;
+    }
+  } else {
+    ship.thrustMain = false;
+  }
+
+  if (keys['ArrowLeft'] || keys['KeyA']) {
+    if (fuel > 0) {
+      ship.vx -= SIDE_THRUST;
+      fuel = Math.max(0, fuel - FUEL_USE * 0.5);
+      ship.thrustRight = true;
+      emitThrust(ship.w / 2 + 2, 0, 1.5, (Math.random() - 0.5), '#6366f1');
+    } else {
+      ship.thrustRight = false;
+    }
+  } else {
+    ship.thrustRight = false;
+  }
+
+  if (keys['ArrowRight'] || keys['KeyD']) {
+    if (fuel > 0) {
+      ship.vx += SIDE_THRUST;
+      fuel = Math.max(0, fuel - FUEL_USE * 0.5);
+      ship.thrustLeft = true;
+      emitThrust(-ship.w / 2 - 2, 0, -1.5, (Math.random() - 0.5), '#6366f1');
+    } else {
+      ship.thrustLeft = false;
+    }
+  } else {
+    ship.thrustLeft = false;
+  }
+
+  ship.x += ship.vx;
+  ship.y += ship.vy;
+
+  // Update particles
+  particles = particles.filter(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.02;
+    p.life--;
+    return p.life > 0;
+  });
+
+  checkLanding();
+}
+
+function drawStars(time) {
+  stars.forEach(s => {
+    const twinkle = Math.sin(time * s.twinkleSpeed) * 0.3 + 0.7;
+    ctx.fillStyle = `rgba(255, 255, 255, ${s.a * twinkle})`;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function drawTerrain() {
+  ctx.beginPath();
+  ctx.moveTo(0, H);
+  terrain.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.lineTo(W, H);
+  ctx.closePath();
+
+  const grad = ctx.createLinearGradient(0, H * 0.6, 0, H);
+  grad.addColorStop(0, '#1e1b4b');
+  grad.addColorStop(1, '#0f0a2e');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  terrain.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.stroke();
+}
+
+function drawPads() {
+  pads.forEach(pad => {
+    // Pad surface
+    ctx.fillStyle = '#22c55e';
+    ctx.fillRect(pad.x, pad.y - 3, pad.w, 3);
+
+    // Glow
+    ctx.shadowColor = '#22c55e';
+    ctx.shadowBlur = 10;
+    ctx.fillRect(pad.x, pad.y - 3, pad.w, 3);
+    ctx.shadowBlur = 0;
+
+    // Bonus text
+    ctx.fillStyle = '#22c55e';
+    ctx.font = '10px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${pad.bonus}pts`, pad.x + pad.w / 2, pad.y - 8);
+  });
+}
+
+function drawShip() {
+  if (gameState === 'crashed') return;
+
+  ctx.save();
+  ctx.translate(ship.x, ship.y);
+
+  // Ship body
+  ctx.fillStyle = '#e4e4e7';
+  ctx.beginPath();
+  ctx.moveTo(0, -ship.h / 2);
+  ctx.lineTo(-ship.w / 2, ship.h / 2);
+  ctx.lineTo(-ship.w / 4, ship.h / 2 - 3);
+  ctx.lineTo(ship.w / 4, ship.h / 2 - 3);
+  ctx.lineTo(ship.w / 2, ship.h / 2);
+  ctx.closePath();
+  ctx.fill();
+
+  // Window
+  ctx.fillStyle = '#6366f1';
+  ctx.beginPath();
+  ctx.arc(0, -ship.h / 6, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Legs
+  ctx.strokeStyle = '#a1a1aa';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-ship.w / 2, ship.h / 2);
+  ctx.lineTo(-ship.w / 2 - 4, ship.h / 2 + 5);
+  ctx.moveTo(ship.w / 2, ship.h / 2);
+  ctx.lineTo(ship.w / 2 + 4, ship.h / 2 + 5);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawParticles() {
+  particles.forEach(p => {
+    const alpha = p.life / p.maxLife;
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 2 * alpha + 0.5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+}
+
+function drawHUD() {
+  const fuelPct = Math.round(fuel);
+  $score.textContent = score;
+  $level.textContent = level;
+  $fuel.textContent = fuelPct + '%';
+  $fuel.className = fuelPct < 20 ? 'warn' : 'val';
+  $vx.textContent = Math.abs(ship.vx).toFixed(1);
+  $vx.className = Math.abs(ship.vx) > MAX_SAFE_VX ? 'warn' : 'good';
+  $vy.textContent = Math.abs(ship.vy).toFixed(1);
+  $vy.className = Math.abs(ship.vy) > MAX_SAFE_VY ? 'warn' : 'good';
+}
+
+function drawOverlay() {
+  if (gameState === 'landed') {
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.9)';
+    ctx.font = 'bold 32px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('LANDED!', W / 2, H / 2 - 20);
+    ctx.fillStyle = '#e4e4e7';
+    ctx.font = '16px Inter, system-ui, sans-serif';
+    ctx.fillText(`Level ${level + 1} incoming...`, W / 2, H / 2 + 15);
+  } else if (gameState === 'crashed') {
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
+    ctx.font = 'bold 32px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('CRASHED!', W / 2, H / 2 - 30);
+    ctx.fillStyle = '#e4e4e7';
+    ctx.font = '16px Inter, system-ui, sans-serif';
+    ctx.fillText(`Final Score: ${score}`, W / 2, H / 2 + 5);
+    ctx.fillStyle = '#6366f1';
+    ctx.fillText('Press R to restart', W / 2, H / 2 + 35);
+  }
+}
+
+function drawStartScreen(time) {
+  ctx.fillStyle = 'rgba(99, 102, 241, 0.9)';
+  ctx.font = 'bold 36px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('ASTRO LANDER', W / 2, H / 2 - 40);
+  ctx.fillStyle = '#a1a1aa';
+  ctx.font = '14px Inter, system-ui, sans-serif';
+  ctx.fillText('Land gently on the green pads', W / 2, H / 2);
+  ctx.fillText('Green speed = safe | Red speed = too fast', W / 2, H / 2 + 22);
+  const alpha = Math.sin(time * 0.003) * 0.3 + 0.7;
+  ctx.fillStyle = `rgba(99, 102, 241, ${alpha})`;
+  ctx.font = 'bold 16px Inter, system-ui, sans-serif';
+  ctx.fillText('Press any arrow key to start', W / 2, H / 2 + 60);
+}
+
+let started = false;
+let time = 0;
+
+function gameLoop(timestamp) {
+  time = timestamp || 0;
+  ctx.clearRect(0, 0, W, H);
+
+  drawStars(time);
+  drawTerrain();
+  drawPads();
+
+  if (!started) {
+    drawShip();
+    drawStartScreen(time);
+  } else {
+    update();
+    drawParticles();
+    drawShip();
+    drawHUD();
+    drawOverlay();
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+document.addEventListener('keydown', e => {
+  keys[e.code] = true;
+
+  if (!started && (e.code.startsWith('Arrow') || e.code === 'KeyW' || e.code === 'KeyA' || e.code === 'KeyS' || e.code === 'KeyD' || e.code === 'Space')) {
+    started = true;
+  }
+
+  if (e.code === 'KeyR') {
+    started = true;
+    init();
+  }
+
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+    e.preventDefault();
+  }
+});
+
+document.addEventListener('keyup', e => {
+  keys[e.code] = false;
+});
+
+// Touch controls for mobile
+let touchActive = {};
+function addTouchButton(id, key) {
+  // We'll use on-screen tilt or tap zones instead
+}
+
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (!started) { started = true; return; }
+  const rect = canvas.getBoundingClientRect();
+  for (const touch of e.touches) {
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    if (y < rect.height * 0.5) {
+      keys['ArrowUp'] = true;
+    }
+    if (x < rect.width * 0.33) {
+      keys['ArrowLeft'] = true;
+    } else if (x > rect.width * 0.67) {
+      keys['ArrowRight'] = true;
+    }
+  }
+});
+
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  keys['ArrowUp'] = false;
+  keys['ArrowLeft'] = false;
+  keys['ArrowRight'] = false;
+});
+
+init();
+requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
