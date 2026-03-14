@@ -1,14 +1,56 @@
 {
   "weeks": [
     {
-      "weekOf": "March 7, 2026",
+      "weekOf": "March 14, 2026",
       "resultsAdded": false,
+      "picks": [
+        {
+          "ticker": "COHR",
+          "company": "Coherent Corp.",
+          "startPrice": 249.00,
+          "targetPrice": 267.00,
+          "reasoning": "S&P 500 inclusion March 9 triggering index fund buying, 9 consecutive double beats, AI data center demand, initiated Buy at TD Cowen"
+        },
+        {
+          "ticker": "GS",
+          "company": "Goldman Sachs Group Inc.",
+          "startPrice": 781.03,
+          "targetPrice": 828.00,
+          "reasoning": "Earnings acceleration with 10.3% growth, P/E of 15.27 is cheap vs peers, April earnings catalyst, oversold 12.9% in four weeks"
+        },
+        {
+          "ticker": "HSY",
+          "company": "The Hershey Company",
+          "startPrice": 220.56,
+          "targetPrice": 234.00,
+          "reasoning": "Zacks Rank #1 Strong Buy upgrade, 30-35% adjusted EPS growth guidance for 2026, Investor Day March 31 catalyst, 400bps gross margin recovery"
+        },
+        {
+          "ticker": "ADMA",
+          "company": "ADMA Biologics Inc.",
+          "startPrice": 15.71,
+          "targetPrice": 16.80,
+          "reasoning": "Zacks Rank #1, Momentum Score A, consensus earnings estimate up 17.1% in 60 days, Q4 revenue up 18% YoY with net income surging 57%"
+        },
+        {
+          "ticker": "RELY",
+          "company": "Remitly Global Inc.",
+          "startPrice": 16.92,
+          "targetPrice": 18.10,
+          "reasoning": "Zacks Rank #1, Momentum Score A, Q4 EPS beat by $0.17, revenue up 25.7% YoY, consensus estimate revised up 50% in 60 days"
+        }
+      ]
+    },
+    {
+      "weekOf": "March 7, 2026",
+      "resultsAdded": true,
       "picks": [
         {
           "ticker": "NVDA",
           "company": "NVIDIA Corporation",
           "startPrice": 178.03,
           "targetPrice": 190.00,
+          "actualPrice": 180.20,
           "reasoning": "Vera Rubin platform pivot from China H200, ex-dividend 3/11 catalyst, $3-4T AI infrastructure spend visibility through decade-end"
         },
         {
@@ -16,6 +58,7 @@
           "company": "Centerra Gold Inc.",
           "startPrice": 20.07,
           "targetPrice": 21.50,
+          "actualPrice": 18.88,
           "reasoning": "Massive Q4 beat and raise, Zacks Rank #1 Strong Buy, 2026 EPS estimate doubled, gold prices at multi-year highs"
         },
         {
@@ -23,6 +66,7 @@
           "company": "Comfort Systems USA Inc.",
           "startPrice": 1320.00,
           "targetPrice": 1400.00,
+          "actualPrice": 1373.76,
           "reasoning": "Data center construction boom, 29.5% revenue growth, earnings estimate revised up 20.9% in last 7 days, Strong Buy consensus"
         },
         {
@@ -30,6 +74,7 @@
           "company": "Onto Innovation Inc.",
           "startPrice": 188.66,
           "targetPrice": 202.00,
+          "actualPrice": 183.59,
           "reasoning": "Record $1B annual revenue, $240M HBM Dragonfly order backlog through 2027, AI advanced packaging leader, target raised to $275"
         },
         {
@@ -37,6 +82,7 @@
           "company": "Marvell Technology Inc.",
           "startPrice": 89.57,
           "targetPrice": 96.00,
+          "actualPrice": 89.54,
           "reasoning": "Post-earnings surge on AI custom silicon demand, 19% jump from prior close, analyst target $118, strong momentum setup"
         }
       ]

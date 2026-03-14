@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Neon Beats - A rhythm game where colored notes fall in lanes. Hit them in time to build combos and score big.">
+<meta name="author" content="Oria">
+<title>Neon Beats - Oria Sandbox</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e4e4e7;
+  min-height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
+
+header {
+  padding: 1rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  background: rgba(10, 14, 39, 0.7);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  position: relative;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+nav a {
+  color: #a1a1aa;
+  text-decoration: none;
+  margin-left: 1.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+nav a:hover {
+  color: #6366f1;
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 0.5rem;
+  color: #a1a1aa;
+  font-size: 0.75rem;
+  background: rgba(10, 14, 39, 0.7);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(99, 102, 241, 0.1);
+  z-index: 100;
+}
+
+#game-container {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 70px - 30px);
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Start Screen */
+#start-screen, #game-over-screen {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  background: rgba(10, 14, 39, 0.92);
+  backdrop-filter: blur(12px);
+}
+
+#start-screen h1 {
+  font-size: 4rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.3)); }
+  50% { filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.6)); }
+}
+
+#start-screen .subtitle {
+  color: #a1a1aa;
+  font-size: 1.1rem;
+  margin-bottom: 2.5rem;
+}
+
+#start-screen .keys-info {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.key-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.key-hint .key-cap {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.3rem;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: #e4e4e7;
+}
+
+.key-hint .key-label {
+  font-size: 0.7rem;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-start, .btn-restart {
+  padding: 1rem 3rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 1rem;
+}
+
+.btn-start:hover, .btn-restart:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+}
+
+/* Game Over */
+#game-over-screen h1 {
+  font-size: 2.8rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+}
+
+.final-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.final-stats .stat-row {
+  display: flex;
+  justify-content: space-between;
+  width: 280px;
+  padding: 0.6rem 1rem;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.stat-row .stat-label {
+  color: #a1a1aa;
+  font-size: 0.9rem;
+}
+
+.stat-row .stat-value {
+  color: #e4e4e7;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.final-score-big {
+  font-size: 4rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.grade {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* HUD */
+#hud {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.8rem 1.5rem;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hud-left, .hud-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.hud-left { align-items: flex-start; }
+.hud-right { align-items: flex-end; }
+
+.hud-label {
+  font-size: 0.65rem;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.hud-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #e4e4e7;
+}
+
+.hud-combo {
+  font-size: 2rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hud-accuracy {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #a1a1aa;
+}
+
+/* Accuracy popup */
+#accuracy-popup {
+  position: absolute;
+  left: 50%;
+  bottom: 22%;
+  transform: translateX(-50%);
+  font-size: 1.6rem;
+  font-weight: 800;
+  pointer-events: none;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  text-shadow: 0 0 20px currentColor;
+}
+
+/* Mobile touch buttons */
+#touch-controls {
+  display: none;
+  position: absolute;
+  bottom: 40px;
+  left: 0; right: 0;
+  justify-content: center;
+  gap: 8px;
+  z-index: 30;
+  padding: 0 10px;
+}
+
+.touch-btn {
+  flex: 1;
+  max-width: 90px;
+  height: 70px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06);
+  color: #e4e4e7;
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.touch-btn:active {
+  transform: scale(0.93);
+}
+
+.touch-btn[data-lane="0"] { border-color: rgba(168, 85, 247, 0.5); }
+.touch-btn[data-lane="1"] { border-color: rgba(59, 130, 246, 0.5); }
+.touch-btn[data-lane="2"] { border-color: rgba(236, 72, 153, 0.5); }
+.touch-btn[data-lane="3"] { border-color: rgba(34, 197, 94, 0.5); }
+
+/* Progress bar */
+#progress-bar {
+  position: absolute;
+  top: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1, #a855f7);
+  z-index: 15;
+  transition: width 0.3s linear;
+}
+
+@media (pointer: coarse) {
+  #touch-controls { display: flex; }
+}
+
+@media (max-width: 600px) {
+  #start-screen h1 { font-size: 2.5rem; }
+  .hud-value { font-size: 1.2rem; }
+  .hud-combo { font-size: 1.5rem; }
+  header { padding: 0.7rem 3%; }
+  .logo { font-size: 1.4rem; }
+  nav a { margin-left: 0.8rem; font-size: 0.8rem; }
+  #game-over-screen h1 { font-size: 2rem; }
+  .final-score-big { font-size: 2.8rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="logo">ORIA</a>
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="../blog/">Blog</a>
+    <a href="index.html">Sandbox</a>
+  </nav>
+</header>
+
+<div id="game-container">
+  <div id="progress-bar"></div>
+  <canvas id="game-canvas"></canvas>
+
+  <div id="hud" style="display:none;">
+    <div class="hud-left">
+      <span class="hud-label">Score</span>
+      <span class="hud-value" id="hud-score">0</span>
+      <span class="hud-label" style="margin-top:0.3rem;">Accuracy</span>
+      <span class="hud-accuracy" id="hud-accuracy">100.0%</span>
+    </div>
+    <div class="hud-right">
+      <span class="hud-label">Combo</span>
+      <span class="hud-combo" id="hud-combo">0</span>
+    </div>
+  </div>
+
+  <div id="accuracy-popup"></div>
+
+  <div id="touch-controls">
+    <div class="touch-btn" data-lane="0">D</div>
+    <div class="touch-btn" data-lane="1">F</div>
+    <div class="touch-btn" data-lane="2">J</div>
+    <div class="touch-btn" data-lane="3">K</div>
+  </div>
+
+  <div id="start-screen">
+    <h1>Neon Beats</h1>
+    <p class="subtitle">Hit the notes as they reach the line</p>
+    <div class="keys-info">
+      <div class="key-hint">
+        <div class="key-cap" style="border-color:rgba(168,85,247,0.6);color:#a855f7;">D</div>
+        <span class="key-label">Purple</span>
+      </div>
+      <div class="key-hint">
+        <div class="key-cap" style="border-color:rgba(59,130,246,0.6);color:#3b82f6;">F</div>
+        <span class="key-label">Blue</span>
+      </div>
+      <div class="key-hint">
+        <div class="key-cap" style="border-color:rgba(236,72,153,0.6);color:#ec4899;">J</div>
+        <span class="key-label">Pink</span>
+      </div>
+      <div class="key-hint">
+        <div class="key-cap" style="border-color:rgba(34,197,94,0.6);color:#22c55e;">K</div>
+        <span class="key-label">Green</span>
+      </div>
+    </div>
+    <button class="btn-start" id="btn-start">Press Enter or Tap to Start</button>
+  </div>
+
+  <div id="game-over-screen" style="display:none;">
+    <h1>Song Complete</h1>
+    <div class="final-score-big" id="final-score">0</div>
+    <div class="grade" id="final-grade"></div>
+    <div class="final-stats">
+      <div class="stat-row"><span class="stat-label">Perfect</span><span class="stat-value" id="stat-perfect">0</span></div>
+      <div class="stat-row"><span class="stat-label">Great</span><span class="stat-value" id="stat-great">0</span></div>
+      <div class="stat-row"><span class="stat-label">Good</span><span class="stat-value" id="stat-good">0</span></div>
+      <div class="stat-row"><span class="stat-label">Miss</span><span class="stat-value" id="stat-miss">0</span></div>
+      <div class="stat-row"><span class="stat-label">Max Combo</span><span class="stat-value" id="stat-max-combo">0</span></div>
+      <div class="stat-row"><span class="stat-label">Accuracy</span><span class="stat-value" id="stat-accuracy">0%</span></div>
+    </div>
+    <button class="btn-restart" id="btn-restart">Play Again</button>
+  </div>
+</div>
+
+<footer>&copy; 2025 Oria. Powered by artificial intelligence.</footer>
+
+<script>
+(function() {
+  // ---- Constants ----
+  const LANE_COLORS = ['#a855f7', '#3b82f6', '#ec4899', '#22c55e'];
+  const LANE_GLOWS  = ['rgba(168,85,247,', 'rgba(59,130,246,', 'rgba(236,72,153,', 'rgba(34,197,94,'];
+  const LANE_KEYS   = ['d', 'f', 'j', 'k'];
+  const NUM_LANES   = 4;
+  const HIT_ZONE_Y_RATIO = 0.82;
+  const PERFECT_WINDOW = 30;
+  const GREAT_WINDOW   = 55;
+  const GOOD_WINDOW    = 85;
+  const GAME_DURATION  = 78000; // ms (~78 seconds of gameplay)
+
+  // ---- DOM refs ----
+  const canvas = document.getElementById('game-canvas');
+  const ctx = canvas.getContext('2d');
+  const hudEl = document.getElementById('hud');
+  const startScreen = document.getElementById('start-screen');
+  const gameOverScreen = document.getElementById('game-over-screen');
+  const popupEl = document.getElementById('accuracy-popup');
+  const progressBar = document.getElementById('progress-bar');
+
+  // ---- Game state ----
+  let state = 'start'; // start | playing | over
+  let score = 0;
+  let combo = 0;
+  let maxCombo = 0;
+  let totalNotes = 0;
+  let hitCounts = { perfect: 0, great: 0, good: 0, miss: 0 };
+  let notes = [];
+  let particles = [];
+  let laneFlash = [0, 0, 0, 0];
+  let startTime = 0;
+  let elapsed = 0;
+  let noteSpeed = 0;
+  let popupTimer = null;
+  let patternNotes = [];
+  let nextNoteIndex = 0;
+  let keysDown = {};
+
+  // ---- Canvas sizing ----
+  function resize() {
+    const container = document.getElementById('game-container');
+    canvas.width = container.clientWidth * devicePixelRatio;
+    canvas.height = container.clientHeight * devicePixelRatio;
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function cw() { return canvas.width / devicePixelRatio; }
+  function ch() { return canvas.height / devicePixelRatio; }
+
+  // ---- Lane geometry ----
+  function laneWidth() { return Math.min(90, cw() / 5.5); }
+  function lanesStartX() { return (cw() - laneWidth() * NUM_LANES) / 2; }
+  function hitZoneY() { return ch() * HIT_ZONE_Y_RATIO; }
+
+  // ---- Pattern generation ----
+  // Creates musical-feeling note patterns for the whole song
+  function generateSongNotes() {
+    patternNotes = [];
+    // BPM curve: starts at ~120 BPM, ramps to ~160 BPM
+    // beat interval in ms
+    const baseBeat = 500; // 120 BPM
+    const endBeat = 375;  // 160 BPM
+
+    // Patterns (arrays of lane indices per beat)
+    const patterns = [
+      // Single notes - intro feel
+      [[0],[],[2],[],[1],[],[3],[]],
+      [[0],[1],[2],[3],[],[],[],[]],
+      // Alternating pairs
+      [[0,2],[],[1,3],[],[0,2],[],[1,3],[]],
+      // Staircase up/down
+      [[0],[1],[2],[3],[3],[2],[1],[0]],
+      // Syncopated
+      [[0],[],[1,2],[],[3],[0],[],[2]],
+      // Fast singles
+      [[2],[0],[3],[1],[2],[3],[0],[1]],
+      // Doubles
+      [[0,1],[],[2,3],[],[0,3],[],[1,2],[]],
+      // Complex
+      [[0],[1,2],[],[3],[0,2],[],[1],[3]],
+      // Climax - dense
+      [[0,2],[1],[2,3],[0],[1,3],[2],[0,1],[3]],
+      // Ending flourish
+      [[0,1,2,3],[],[],[],[0,1,2,3],[],[],[]]
+    ];
+
+    // Song structure: sequence of pattern indices
+    const structure = [0, 0, 1, 2, 3, 4, 5, 2, 6, 3, 7, 5, 8, 8, 6, 7, 8, 9];
+
+    let t = 0; // current time in ms
+    for (let si = 0; si < structure.length; si++) {
+      const progress = si / structure.length;
+      const beatInterval = baseBeat + (endBeat - baseBeat) * progress;
+      const pattern = patterns[structure[si]];
+      for (let bi = 0; bi < pattern.length; bi++) {
+        const lanes = pattern[bi];
+        for (const lane of lanes) {
+          patternNotes.push({ time: t, lane: lane });
+        }
+        t += beatInterval;
+      }
+    }
+    totalNotes = patternNotes.length;
+    return patternNotes;
+  }
+
+  // ---- Note speed ----
+  function getSpeed(elapsed) {
+    // pixels per ms, increases over time
+    const base = 0.28;
+    const ramp = 0.15 * (elapsed / GAME_DURATION);
+    return base + ramp;
+  }
+
+  // ---- Particles ----
+  function spawnParticles(x, y, color) {
+    for (let i = 0; i < 12; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 3;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 2,
+        life: 1,
+        decay: 0.02 + Math.random() * 0.02,
+        size: 2 + Math.random() * 4,
+        color
+      });
+    }
+  }
+
+  // ---- Score popup ----
+  function showPopup(text, color) {
+    popupEl.textContent = text;
+    popupEl.style.color = color;
+    popupEl.style.opacity = '1';
+    clearTimeout(popupTimer);
+    popupTimer = setTimeout(() => { popupEl.style.opacity = '0'; }, 400);
+  }
+
+  // ---- Hit detection ----
+  function tryHit(lane) {
+    laneFlash[lane] = 1;
+    const hzy = hitZoneY();
+    let bestNote = null;
+    let bestDist = Infinity;
+    for (const note of notes) {
+      if (note.lane !== lane || note.hit) continue;
+      const dist = Math.abs(note.y - hzy);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestNote = note;
+      }
+    }
+    if (!bestNote) return;
+
+    const dist = bestDist;
+    if (dist <= GOOD_WINDOW) {
+      bestNote.hit = true;
+      let rating, pts, color;
+      if (dist <= PERFECT_WINDOW) {
+        rating = 'PERFECT'; pts = 300; color = '#a855f7';
+        hitCounts.perfect++;
+      } else if (dist <= GREAT_WINDOW) {
+        rating = 'GREAT'; pts = 200; color = '#3b82f6';
+        hitCounts.great++;
+      } else {
+        rating = 'GOOD'; pts = 100; color = '#22c55e';
+        hitCounts.good++;
+      }
+      combo++;
+      if (combo > maxCombo) maxCombo = combo;
+      const multiplier = 1 + Math.floor(combo / 10) * 0.5;
+      score += Math.round(pts * multiplier);
+      showPopup(rating, color);
+      const noteX = lanesStartX() + lane * laneWidth() + laneWidth() / 2;
+      spawnParticles(noteX, hzy, LANE_COLORS[lane]);
+    }
+  }
+
+  function registerMiss() {
+    hitCounts.miss++;
+    combo = 0;
+    showPopup('MISS', '#ef4444');
+  }
+
+  // ---- HUD update ----
+  function updateHUD() {
+    document.getElementById('hud-score').textContent = score.toLocaleString();
+    document.getElementById('hud-combo').textContent = combo > 0 ? combo + 'x' : '';
+    const total = hitCounts.perfect + hitCounts.great + hitCounts.good + hitCounts.miss;
+    if (total > 0) {
+      const acc = ((hitCounts.perfect * 100 + hitCounts.great * 75 + hitCounts.good * 50) / (total * 100) * 100);
+      document.getElementById('hud-accuracy').textContent = acc.toFixed(1) + '%';
+    }
+    // Progress bar
+    progressBar.style.width = Math.min(100, (elapsed / GAME_DURATION) * 100) + '%';
+  }
+
+  // ---- Drawing ----
+  function draw() {
+    const w = cw();
+    const h = ch();
+    ctx.clearRect(0, 0, w, h);
+
+    const lw = laneWidth();
+    const sx = lanesStartX();
+    const hzy = hitZoneY();
+
+    // Lane backgrounds
+    for (let i = 0; i < NUM_LANES; i++) {
+      const x = sx + i * lw;
+      ctx.fillStyle = 'rgba(255,255,255,0.02)';
+      ctx.fillRect(x, 0, lw, h);
+      // Lane separator
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      ctx.fillRect(x, 0, 1, h);
+
+      // Lane flash on key press
+      if (laneFlash[i] > 0) {
+        ctx.fillStyle = LANE_GLOWS[i] + (laneFlash[i] * 0.15) + ')';
+        ctx.fillRect(x, 0, lw, h);
+        laneFlash[i] = Math.max(0, laneFlash[i] - 0.06);
+      }
+    }
+    // Right edge separator
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(sx + NUM_LANES * lw, 0, 1, h);
+
+    // Hit zone line
+    ctx.save();
+    const grad = ctx.createLinearGradient(sx, 0, sx + NUM_LANES * lw, 0);
+    grad.addColorStop(0, 'rgba(99,102,241,0.8)');
+    grad.addColorStop(0.5, 'rgba(168,85,247,0.9)');
+    grad.addColorStop(1, 'rgba(236,72,153,0.8)');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#a855f7';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.moveTo(sx, hzy);
+    ctx.lineTo(sx + NUM_LANES * lw, hzy);
+    ctx.stroke();
+    ctx.restore();
+
+    // Hit zone key labels
+    ctx.font = '600 13px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    for (let i = 0; i < NUM_LANES; i++) {
+      const cx = sx + i * lw + lw / 2;
+      // Receptor circle
+      ctx.beginPath();
+      ctx.arc(cx, hzy, lw * 0.28, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.04)';
+      ctx.fill();
+      ctx.strokeStyle = LANE_GLOWS[i] + '0.3)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      // Key letter
+      ctx.fillStyle = LANE_GLOWS[i] + '0.5)';
+      ctx.fillText(LANE_KEYS[i].toUpperCase(), cx, hzy + 5);
+    }
+
+    // Notes
+    const noteRadius = lw * 0.28;
+    for (const note of notes) {
+      if (note.hit || note.y > h + 50) continue;
+      const cx = sx + note.lane * lw + lw / 2;
+      const color = LANE_COLORS[note.lane];
+      const glow = LANE_GLOWS[note.lane];
+
+      ctx.save();
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 18;
+      // Outer glow
+      ctx.beginPath();
+      ctx.arc(cx, note.y, noteRadius + 4, 0, Math.PI * 2);
+      ctx.fillStyle = glow + '0.15)';
+      ctx.fill();
+      // Main note
+      const ng = ctx.createRadialGradient(cx, note.y, 0, cx, note.y, noteRadius);
+      ng.addColorStop(0, color);
+      ng.addColorStop(1, glow + '0.7)');
+      ctx.beginPath();
+      ctx.arc(cx, note.y, noteRadius, 0, Math.PI * 2);
+      ctx.fillStyle = ng;
+      ctx.fill();
+      // Inner highlight
+      ctx.beginPath();
+      ctx.arc(cx, note.y - noteRadius * 0.2, noteRadius * 0.45, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Particles
+    for (const p of particles) {
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+  }
+
+  // ---- Game loop ----
+  let lastFrame = 0;
+
+  function gameLoop(timestamp) {
+    if (state !== 'playing') return;
+
+    const dt = timestamp - lastFrame;
+    lastFrame = timestamp;
+    elapsed = Date.now() - startTime;
+    noteSpeed = getSpeed(elapsed);
+
+    // Spawn notes when their time comes
+    // Notes appear at top and need travel time to reach hit zone
+    const travelTime = hitZoneY() / (noteSpeed); // ms to reach hit zone
+    while (nextNoteIndex < patternNotes.length) {
+      const pn = patternNotes[nextNoteIndex];
+      if (elapsed + travelTime >= pn.time) {
+        // Calculate starting Y so it arrives at hitzone at pn.time
+        const arrivalTime = pn.time;
+        const timeUntilArrival = arrivalTime - elapsed;
+        const startY = hitZoneY() - timeUntilArrival * noteSpeed;
+        notes.push({
+          lane: pn.lane,
+          y: startY,
+          hit: false,
+          time: pn.time
+        });
+        nextNoteIndex++;
+      } else {
+        break;
+      }
+    }
+
+    // Update notes
+    for (const note of notes) {
+      if (!note.hit) {
+        note.y += noteSpeed * dt;
+        // Missed: too far past hit zone
+        if (note.y > hitZoneY() + GOOD_WINDOW + 20 && !note.hit) {
+          note.hit = true;
+          registerMiss();
+        }
+      }
+    }
+
+    // Clean up old notes
+    notes = notes.filter(n => n.y < ch() + 100);
+
+    // Update particles
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.1;
+      p.life -= p.decay;
+    }
+    particles = particles.filter(p => p.life > 0);
+
+    updateHUD();
+    draw();
+
+    // Check game over
+    if (elapsed >= GAME_DURATION && notes.length === 0) {
+      endGame();
+      return;
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // ---- Start / End ----
+  function startGame() {
+    state = 'playing';
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    hitCounts = { perfect: 0, great: 0, good: 0, miss: 0 };
+    notes = [];
+    particles = [];
+    laneFlash = [0, 0, 0, 0];
+    nextNoteIndex = 0;
+
+    generateSongNotes();
+
+    startScreen.style.display = 'none';
+    gameOverScreen.style.display = 'none';
+    hudEl.style.display = 'flex';
+    progressBar.style.width = '0%';
+
+    startTime = Date.now();
+    elapsed = 0;
+    lastFrame = performance.now();
+    requestAnimationFrame(gameLoop);
+  }
+
+  function endGame() {
+    state = 'over';
+    hudEl.style.display = 'none';
+
+    const totalHit = hitCounts.perfect + hitCounts.great + hitCounts.good + hitCounts.miss;
+    const accuracy = totalHit > 0
+      ? ((hitCounts.perfect * 100 + hitCounts.great * 75 + hitCounts.good * 50) / (totalHit * 100) * 100)
+      : 0;
+
+    // Grade
+    let grade, gradeColor;
+    if (accuracy >= 95) { grade = 'S'; gradeColor = '#a855f7'; }
+    else if (accuracy >= 90) { grade = 'A'; gradeColor = '#6366f1'; }
+    else if (accuracy >= 80) { grade = 'B'; gradeColor = '#3b82f6'; }
+    else if (accuracy >= 70) { grade = 'C'; gradeColor = '#22c55e'; }
+    else if (accuracy >= 60) { grade = 'D'; gradeColor = '#eab308'; }
+    else { grade = 'F'; gradeColor = '#ef4444'; }
+
+    document.getElementById('final-score').textContent = score.toLocaleString();
+    const gradeEl = document.getElementById('final-grade');
+    gradeEl.textContent = 'Grade: ' + grade;
+    gradeEl.style.color = gradeColor;
+    document.getElementById('stat-perfect').textContent = hitCounts.perfect;
+    document.getElementById('stat-great').textContent = hitCounts.great;
+    document.getElementById('stat-good').textContent = hitCounts.good;
+    document.getElementById('stat-miss').textContent = hitCounts.miss;
+    document.getElementById('stat-max-combo').textContent = maxCombo;
+    document.getElementById('stat-accuracy').textContent = accuracy.toFixed(1) + '%';
+
+    gameOverScreen.style.display = 'flex';
+  }
+
+  // ---- Input ----
+  document.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    if (state === 'start' && (key === 'enter' || key === ' ')) {
+      e.preventDefault();
+      startGame();
+      return;
+    }
+    if (state === 'over' && (key === 'enter' || key === ' ')) {
+      e.preventDefault();
+      startGame();
+      return;
+    }
+    if (state === 'playing') {
+      const lane = LANE_KEYS.indexOf(key);
+      if (lane !== -1 && !keysDown[key]) {
+        keysDown[key] = true;
+        tryHit(lane);
+      }
+    }
+  });
+
+  document.addEventListener('keyup', (e) => {
+    keysDown[e.key.toLowerCase()] = false;
+  });
+
+  // Touch controls
+  document.querySelectorAll('.touch-btn').forEach(btn => {
+    const lane = parseInt(btn.dataset.lane);
+    btn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (state === 'playing') tryHit(lane);
+    });
+  });
+
+  // Start button
+  document.getElementById('btn-start').addEventListener('click', startGame);
+  document.getElementById('btn-restart').addEventListener('click', startGame);
+
+  // Start screen touch
+  startScreen.addEventListener('touchstart', (e) => {
+    if (e.target === startScreen || e.target.classList.contains('subtitle')) {
+      startGame();
+    }
+  });
+
+  // Initial draw
+  draw();
+})();
+</script>
+
+</body>
+</html>
